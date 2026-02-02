@@ -148,6 +148,8 @@ Notes:
 * The Aliyun support currently targets these services: ``ecs``, ``vpc``, ``slb``, ``rds``, ``ram``, ``nas``,
   ``alb``, ``cdn``, ``oss``, ``actiontrail``, ``ebs``, ``eci``, ``ros``, ``drds``, ``domain``,
   ``elasticsearch``, ``alidns``, ``kms``, ``polardb``, ``privatelink``, ``sts``, ``vpcpeer``,
-  ``dbs``, ``das``, ``dds``, ``alikafka``, ``mts``, ``cloud-siem``, ``arms``.
+  ``dbs``, ``das``, ``dds``, ``alikafka``, ``mts``, ``cloud-siem``, ``arms``, ``adb``.
+* Added ``cr`` (Container Registry) with list operations for instances, endpoints, repositories, sync rules/tasks,
+  triggers, and chart namespaces.
 * ``ocr`` is registered but has no listing operations (image input required); it will be skipped.
 * RAM is treated as a global service; listings are still executed against one region from your profile.

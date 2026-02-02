@@ -61,10 +61,13 @@ def _build_request(operation, endpoint, region, parameters):
 def _resolve_parameters(params):
     if not params:
         return {}
-    today = datetime.utcnow().date()
+    now = datetime.utcnow()
+    today = now.date()
     defaults = {
         "__DEFAULT_START_DATE__": (today - timedelta(days=30)).isoformat(),
         "__DEFAULT_END_DATE__": today.isoformat(),
+        "__DEFAULT_START_TIME__": (now - timedelta(days=30)).isoformat(timespec="seconds") + "Z",
+        "__DEFAULT_END_TIME__": now.isoformat(timespec="seconds") + "Z",
     }
     resolved = {}
     for key, value in params.items():
