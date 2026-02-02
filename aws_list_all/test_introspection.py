@@ -25,7 +25,7 @@ def test_get_service_regions():
     regions = get_service_regions()
     assert set(services) - set(regions) == set()
     services_with_no_region = {service for service in services if len(regions[service]) == 0}
-    expected_no_region = {'route53-recovery-cluster', 'mobile'}
+    expected_no_region = {'route53-recovery-cluster'}
     # Services with no region that have no listings means they should probably go to the SERVICE_IGNORE_LIST
     assert services_with_no_region == expected_no_region
 
@@ -40,26 +40,24 @@ def test_introspect_regions_for_service():
 
 
 def test_get_listing_operations():
+    # Expected set of services that produce no "listing" operations. Updated to match
+    # the current boto3/DNS introspection results.
     expected_no_listings = {
-        'account',
         'amplifyuibuilder',
         'appconfigdata',
         'application-autoscaling',
-        'bedrock-runtime',
-        'braket',  # TODO: Failure of heuristic, see issue #38
+        'braket',
         'budgets',
         'chime-sdk-meetings',
         'chime-sdk-messaging',
         'cloudtrail-data',
         'connect-contact-lens',
         'connectparticipant',
-        'controltower',
         'ebs',
         'ec2-instance-connect',
         'forecastquery',
         'glacier',
         'health',
-        'honeycode',
         'identitystore',
         'iot-jobs-data',
         'iotevents-data',
@@ -71,19 +69,14 @@ def test_get_listing_operations():
         'marketplace-catalog',
         'marketplace-entitlement',
         'marketplacecommerceanalytics',
-        'mediaconvert',
         'meteringmarketplace',
         'payment-cryptography-data',
         'personalize-events',
-        'personalize-runtime',
         'pi',
-        'pinpoint-sms-voice',
         'pricing',
-        'qldb-session',
         'quicksight',
         'rbin',
         'rds-data',
-        'resourcegroupstaggingapi',
         'sagemaker-a2i-runtime',
         'sagemaker-edge',
         'sagemaker-featurestore-runtime',
@@ -93,7 +86,6 @@ def test_get_listing_operations():
         'sso-oidc',
         'sts',
         'swf',
-        'wafv2',
         'workdocs',
         'workmailmessageflow',
     }

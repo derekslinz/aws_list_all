@@ -82,6 +82,11 @@ Show resources for all ec2 returned queries::
 
   aws-list-all show --verbose data/ec2*
 
+Build a report from saved listings::
+
+  aws-list-all report --directory ./data/
+  aws-list-all report --directory ./data/ --format json --output report.json
+
 List available services to query::
 
   aws-list-all introspect list-services
@@ -93,3 +98,56 @@ List available operations for a given service, do::
 List all resources in sequence to avoid throttling::
 
   aws-list-all query --parallel 1
+
+Aliyun Support (Preview)
+------------------------
+
+This project now includes an Aliyun entry point with a subset of services supported via the official
+Alibaba Cloud Python SDK core client. Configuration is read from ``~/.aliyun/config.json``.
+
+Quick Start::
+
+  aliyun-list-all query --directory ./data/
+
+Limit to a service or region::
+
+  aliyun-list-all query --service ecs --region cn-hangzhou --directory ./data/
+
+List available Aliyun services and operations::
+
+  aliyun-list-all introspect list-services
+  aliyun-list-all introspect list-operations --service ecs
+
+Build a report from saved listings::
+
+  aliyun-list-all report --directory ./data/
+  aliyun-list-all report --directory ./data/ --format json --output report.json
+
+Supported regions (fixed list):
+
+* cn-qingdao
+* cn-beijing
+* cn-zhangjiakou
+* cn-huhehaote
+* cn-hangzhou
+* cn-shanghai
+* cn-shenzhen
+* cn-hongkong
+* ap-northeast-1
+* ap-southeast-1
+* ap-southeast-3
+* ap-southeast-5
+* ap-south-1
+* us-east-1
+* us-west-1
+* me-east-1
+* eu-central-1
+
+Notes:
+
+* The Aliyun support currently targets these services: ``ecs``, ``vpc``, ``slb``, ``rds``, ``ram``, ``nas``,
+  ``alb``, ``cdn``, ``oss``, ``actiontrail``, ``ebs``, ``eci``, ``ros``, ``drds``, ``domain``,
+  ``elasticsearch``, ``alidns``, ``kms``, ``polardb``, ``privatelink``, ``sts``, ``vpcpeer``,
+  ``dbs``, ``das``, ``dds``, ``alikafka``, ``mts``, ``cloud-siem``, ``arms``.
+* ``ocr`` is registered but has no listing operations (image input required); it will be skipped.
+* RAM is treated as a global service; listings are still executed against one region from your profile.

@@ -9,6 +9,7 @@ from sys import exit, stderr
 from .introspection import (
     get_listing_operations, get_services, get_verbs, introspect_regions_for_service, recreate_caches
 )
+from .report import write_report
 from .query import do_list_files, do_query
 
 CAN_SET_OPEN_FILE_LIMIT = False
@@ -99,6 +100,13 @@ def main():
     show.add_argument('listingfile', nargs='*', help='listing file(s) to load and print')
     show.add_argument('-v', '--verbose', action='count', help='print given listing files with detailed info')
 
+    report = subparsers.add_parser(
+        'report', description='Build a report from saved listings', help='Report'
+    )
+    report.add_argument('-d', '--directory', default='.', help='Directory to read listing json files from')
+    report.add_argument('-f', '--format', default='text', choices=('text', 'json', 'csv'), help='Output format')
+    report.add_argument('-o', '--output', help='Write report to a file instead of stdout')
+
     # Introspection debugging is not the main function. So we put it all into a subcommand.
     introspect = subparsers.add_parser(
         'introspect',
@@ -180,6 +188,8 @@ def main():
         else:
             show.print_help()
             return 1
+    elif args.command == 'report':
+        write_report(args.directory, report_format=args.format, output=args.output)
     elif args.command == 'introspect':
         if args.introspect == 'list-services':
             for service in get_services():

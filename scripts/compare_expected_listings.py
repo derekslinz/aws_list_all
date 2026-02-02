@@ -1,0 +1,75 @@
+from aws_list_all.introspection import get_services, get_listing_operations
+
+expected_no_listings = {
+    'amplifyuibuilder',
+    'appconfigdata',
+    'application-autoscaling',
+    'braket',
+    'budgets',
+    'chime-sdk-meetings',
+    'chime-sdk-messaging',
+    'cloudfront-keyvaluestore',
+    'cloudtrail-data',
+    'connect-contact-lens',
+    'connectparticipant',
+    'ds-data',
+    'ebs',
+    'ec2-instance-connect',
+    'eks-auth',
+    'forecastquery',
+    'geo-maps',
+    'geo-places',
+    'geo-routes',
+    'glacier',
+    'health',
+    'identitystore',
+    'inspector-scan',
+    'iot-jobs-data',
+    'iotevents-data',
+    'kinesis-video-signaling',
+    'kinesis-video-webrtc-storage',
+    'lex-runtime',
+    'lexv2-runtime',
+    'managedblockchain-query',
+    'marketplace-agreement',
+    'marketplace-catalog',
+    'marketplace-deployment',
+    'marketplace-entitlement',
+    'marketplace-reporting',
+    'marketplacecommerceanalytics',
+    'meteringmarketplace',
+    'partnercentral-account',
+    'partnercentral-benefits',
+    'partnercentral-channel',
+    'partnercentral-selling',
+    'payment-cryptography-data',
+    'personalize-events',
+    'pi',
+    'pricing',
+    'qapps',
+    'quicksight',
+    'rbin',
+    'rds-data',
+    'sagemaker-a2i-runtime',
+    'sagemaker-edge',
+    'sagemaker-featurestore-runtime',
+    'sagemaker-metrics',
+    'sagemaker-runtime',
+    'signin',
+    'sso',
+    'sso-oidc',
+    'sts',
+    'swf',
+    'workdocs',
+    'workmailmessageflow',
+}
+
+services_with_no_listings = set()
+for service in get_services():
+    if len(get_listing_operations(service, region='us-east-1')) == 0:
+        services_with_no_listings.add(service)
+
+print('expected - actual:', sorted(list(expected_no_listings - services_with_no_listings)))
+print('actual - expected:', sorted(list(services_with_no_listings - expected_no_listings)))
+print('len expected', len(expected_no_listings))
+print('len actual', len(services_with_no_listings))

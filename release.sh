@@ -2,8 +2,8 @@
 set -eux
 
 rm -rf dist $HOME/.cache/aws_list_all/
-python -m pip install --upgrade flake8 yapf pytest twine
-python -m pip install -e .
+python3.14 -m pip install --upgrade flake8 yapf pytest twine
+python3.14 -m pip install -e .
 aws_list_all --help
 pytest
 flake8

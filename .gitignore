@@ -98,3 +98,6 @@ data/
 
 # PyTest Cache
 .pytest_cache/
+    
+#json outputs
+*.json
