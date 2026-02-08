@@ -171,6 +171,15 @@ def _execute_oss_operation(profile, operation, endpoint):
     return {}, []
 
 
+def _format_iter_label(params):
+    if not params:
+        return "all"
+    parts = []
+    for key, value in sorted(params.items()):
+        parts.append("{}={}".format(key, value))
+    return ", ".join(parts)
+
+
 def do_query(services, selected_regions=(), selected_operations=(), verbose=0, parallel=16, profile_name=None):
     profile = load_profile(profile_name=profile_name)
     to_run = []
@@ -277,6 +286,7 @@ def do_query(services, selected_regions=(), selected_operations=(), verbose=0, p
 def acquire_listing(verbose, what):
     service, region, operation, profile, spec, region_label = what[:6]
     iterate_values = what[6] if len(what) > 6 else None
+    iteration_counts = None
     start_time = time()
     endpoint = spec.endpoint_template.format(region=region)
     try:
@@ -291,12 +301,15 @@ def acquire_listing(verbose, what):
             if iterate_values:
                 items = []
                 response = None
+                iteration_counts = {}
                 for params_override in iterate_values:
                     params = _resolve_parameters(operation.parameters)
                     params.update(params_override)
                     op_with_params = replace(operation, parameters=params)
                     response, new_items = _execute_operation(client, op_with_params, endpoint, request_region)
                     items.extend(new_items)
+                    label = _format_iter_label(params_override)
+                    iteration_counts[label] = iteration_counts.get(label, 0) + len(new_items)
             else:
                 response, items = _execute_operation(client, operation, endpoint, request_region)
         duration = time() - start_time
@@ -312,6 +325,7 @@ def acquire_listing(verbose, what):
             resource_type=operation.resource_type,
             result_path=operation.result_path,
             resources=items,
+            iteration_counts=iteration_counts,
         )
         if listing.resource_total_count > 0:
             filename = '{}_{}_{}_{}.json'.format(service, operation.name, region_label, profile.get('name'))

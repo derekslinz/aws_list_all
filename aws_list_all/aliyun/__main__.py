@@ -34,7 +34,7 @@ def main():
 
     report = subparsers.add_parser('report', description='Build a report from saved listings', help='Report')
     report.add_argument('-d', '--directory', default='.', help='Directory to read listing json files from')
-    report.add_argument('-f', '--format', default='text', choices=('text', 'json', 'csv'), help='Output format')
+    report.add_argument('-f', '--format', default='html', choices=('text', 'json', 'csv', 'html'), help='Output format')
     report.add_argument('-o', '--output', help='Write report to a file instead of stdout')
 
     introspect = subparsers.add_parser(

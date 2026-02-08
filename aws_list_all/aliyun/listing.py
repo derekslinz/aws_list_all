@@ -20,7 +20,18 @@ def _extract_path(data, path):
 
 
 class AliyunListing(object):
-    def __init__(self, service, region, operation, response, profile, resource_type, result_path, resources=None):
+    def __init__(
+        self,
+        service,
+        region,
+        operation,
+        response,
+        profile,
+        resource_type,
+        result_path,
+        resources=None,
+        iteration_counts=None,
+    ):
         self.service = service
         self.region = region
         self.operation = operation
@@ -29,10 +40,11 @@ class AliyunListing(object):
         self.resource_type = resource_type
         self.result_path = result_path
         self._resources = resources
+        self.iteration_counts = iteration_counts
 
     def to_json(self):
         resource_items = self.resources.get(self.resource_type, [])
-        return {
+        data = {
             "service": self.service,
             "region": self.region,
             "profile": self.profile,
@@ -42,6 +54,9 @@ class AliyunListing(object):
             "response": self.response,
             "resources": resource_items,
         }
+        if self.iteration_counts:
+            data["iteration_counts"] = self.iteration_counts
+        return data
 
     @classmethod
     def from_json(cls, data):
@@ -59,6 +74,7 @@ class AliyunListing(object):
             result_path=tuple(data.get("result_path") or ()),
             response=data.get("response"),
             resources=resources,
+            iteration_counts=data.get("iteration_counts"),
         )
 
     @property
