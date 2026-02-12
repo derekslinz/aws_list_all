@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aliyun Resource Report</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #34d399;
+      --border: #1f2937;
+      --panel-2: #0b1222;
+      --chip: #0b1f2f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, #13293d 0%, #0f172a 55%, #0b1020 100%);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr auto;
+      gap: 12px;
+      padding: 16px 24px 0;
+      align-items: center;
+    }
+    .controls input, .controls select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      font-size: 12px;
+    }
+    .controls button {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    header {
+      padding: 32px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      padding: 16px 24px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .card .big {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .section {
+      padding: 8px 24px 24px;
+    }
+    details {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #0d1426;
+    }
+    details summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+    }
+    details + details {
+      margin-top: 10px;
+    }
+    .stack {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px 12px;
+      margin-top: 10px;
+    }
+    .node {
+      color: var(--muted);
+    }
+    .leaf {
+      color: var(--text);
+    }
+    .pill {
+      background: var(--chip);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: var(--accent);
+      margin-left: 8px;
+    }
+    .clickable {
+      cursor: pointer;
+    }
+    .bar-chart {
+      display: grid;
+      gap: 8px;
+    }
+    .bar {
+      display: grid;
+      grid-template-columns: 120px 1fr 50px;
+      gap: 12px;
+      align-items: center;
+      font-size: 12px;
+    }
+    .bar .track {
+      background: var(--panel-2);
+      border-radius: 999px;
+      height: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .bar .fill {
+      background: var(--accent);
+      height: 100%;
+      border-radius: 999px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      table-layout: fixed;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      text-align: left;
+      vertical-align: top;
+      word-break: break-word;
+    }
+    th {
+      background: #0b1222;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tr:nth-child(even) td {
+      background: #0d1426;
+    }
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 16px;
+    }
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+      .controls { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+  <header>
+    <h1>Aliyun Resource Report</h1>
+    <div class="sub">Generated at 2026-02-05T02:40:50Z · <span id="filteredMeta"></span></div>
+  </header>
+  <div class="controls">
+    <input id="searchInput" placeholder="Search service, region, operation, iterated, type, file..." />
+    <select id="serviceFilter"></select>
+    <select id="regionFilter"></select>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button id="resetFilters">Reset</button>
+      <button id="expandAll">Expand</button>
+      <button id="collapseAll">Collapse</button>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card"><h2>Total Resources</h2><div class="big" id="totalResources">39770</div></div>
+    <div class="card"><h2>Services</h2><div class="big" id="totalServices">13</div></div>
+    <div class="card"><h2>Files</h2><div class="big" id="totalFiles">244</div></div>
+    <div class="card"><h2>Entries</h2><div class="big" id="totalEntries">392</div></div>
+  </div>
+  <div class="section two-col">
+    <div>
+      <h2>Resources by Service</h2>
+      <div class="bar-chart" id="serviceChart"></div>
+    </div>
+    <div>
+      <h2>Hierarchy</h2>
+      <div class="stack" id="hierarchy"></div>
+    </div>
+  </div>
+  <div class="section">
+    <h2>Details</h2>
+    <div style="overflow:auto; max-height: 60vh;">
+    <table>
+      <thead>
+        <tr>
+          <th>Service</th><th>Region</th><th>Operation</th><th>Iterated</th><th>Type</th><th class="num">Count</th><th>File</th>
+        </tr>
+      </thead>
+      <tbody id="detailBody"></tbody>
+    </table>
+    </div>
+  </div>
+  </div>
+  <script>
+    const entries = [{"service":"actiontrail","region":"cn-hangzhou","operation":"DescribeTrails","iterated":"","resource_type":"Trails","count":2,"file":"actiontrail_DescribeTrails_cn-hangzhou_default.json"},{"service":"adb","region":"ap-southeast-1","operation":"DescribeDBClusterAttribute","iterated":"DBClusterId=amv-t4n61fx79yn1pgd4","resource_type":"DBClusterAttribute","count":1,"file":"adb_DescribeDBClusterAttribute_ap-southeast-1_default.json"},{"service":"adb","region":"ap-southeast-1","operation":"DescribeDBClusterAttribute","iterated":"DBClusterId=amv-t4nqf8t1o3cq87u9","resource_type":"DBClusterAttribute","count":1,"file":"adb_DescribeDBClusterAttribute_ap-southeast-1_default.json"},{"service":"adb","region":"ap-southeast-1","operation":"DescribeDBClusters","iterated":"","resource_type":"DBClusters","count":2,"file":"adb_DescribeDBClusters_ap-southeast-1_default.json"},{"service":"adb","region":"ap-southeast-1","operation":"DescribeProcessList","iterated":"DBClusterId=amv-t4n61fx79yn1pgd4","resource_type":"ProcessList","count":2,"file":"adb_DescribeProcessList_ap-southeast-1_default.json"},{"service":"adb","region":"ap-southeast-1","operation":"DescribeProcessList","iterated":"DBClusterId=amv-t4nqf8t1o3cq87u9","resource_type":"ProcessList","count":0,"file":"adb_DescribeProcessList_ap-southeast-1_default.json"},{"service":"adb","region":"ap-northeast-1","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_ap-northeast-1_default.json"},{"service":"adb","region":"ap-southeast-1","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_ap-southeast-1_default.json"},{"service":"adb","region":"ap-southeast-3","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_ap-southeast-3_default.json"},{"service":"adb","region":"ap-southeast-5","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_ap-southeast-5_default.json"},{"service":"adb","region":"cn-beijing","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_cn-beijing_default.json"},{"service":"adb","region":"cn-hangzhou","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_cn-hangzhou_default.json"},{"service":"adb","region":"cn-hongkong","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_cn-hongkong_default.json"},{"service":"adb","region":"cn-huhehaote","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_cn-huhehaote_default.json"},{"service":"adb","region":"cn-qingdao","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_cn-qingdao_default.json"},{"service":"adb","region":"cn-shenzhen","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_cn-shenzhen_default.json"},{"service":"adb","region":"cn-zhangjiakou","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_cn-zhangjiakou_default.json"},{"service":"adb","region":"eu-central-1","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_eu-central-1_default.json"},{"service":"adb","region":"us-east-1","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_us-east-1_default.json"},{"service":"adb","region":"us-west-1","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_us-west-1_default.json"},{"service":"adb","region":"ap-northeast-1","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":2,"file":"adb_DescribeVpcs_ap-northeast-1_default.json"},{"service":"adb","region":"ap-southeast-1","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":8,"file":"adb_DescribeVpcs_ap-southeast-1_default.json"},{"service":"adb","region":"ap-southeast-3","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":1,"file":"adb_DescribeVpcs_ap-southeast-3_default.json"},{"service":"adb","region":"ap-southeast-5","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":1,"file":"adb_DescribeVpcs_ap-southeast-5_default.json"},{"service":"adb","region":"cn-beijing","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":1,"file":"adb_DescribeVpcs_cn-beijing_default.json"},{"service":"adb","region":"cn-hangzhou","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":1,"file":"adb_DescribeVpcs_cn-hangzhou_default.json"},{"service":"adb","region":"cn-hongkong","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":1,"file":"adb_DescribeVpcs_cn-hongkong_default.json"},{"service":"adb","region":"eu-central-1","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":2,"file":"adb_DescribeVpcs_eu-central-1_default.json"},{"service":"adb","region":"us-east-1","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":4,"file":"adb_DescribeVpcs_us-east-1_default.json"},{"service":"alb","region":"ap-southeast-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-bh7zurrk70jplh38f9","resource_type":"Listeners","count":2,"file":"alb_ListListeners_ap-southeast-1_default.json"},{"service":"alb","region":"ap-southeast-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-mo73m3w07ce6ho8h8w","resource_type":"Listeners","count":2,"file":"alb_ListListeners_ap-southeast-1_default.json"},{"service":"alb","region":"ap-southeast-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-f0sujr02vw73uy217q","resource_type":"Listeners","count":2,"file":"alb_ListListeners_ap-southeast-1_default.json"},{"service":"alb","region":"eu-central-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-trmeplerapik4add06","resource_type":"Listeners","count":2,"file":"alb_ListListeners_eu-central-1_default.json"},{"service":"alb","region":"eu-central-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-fi74nkafmxipvdts4n","resource_type":"Listeners","count":2,"file":"alb_ListListeners_eu-central-1_default.json"},{"service":"alb","region":"us-east-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-c6yfbamjr658vqgc9l","resource_type":"Listeners","count":2,"file":"alb_ListListeners_us-east-1_default.json"},{"service":"alb","region":"us-east-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-umq151lp30fq9spf2o","resource_type":"Listeners","count":1,"file":"alb_ListListeners_us-east-1_default.json"},{"service":"alb","region":"us-east-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-76nen1zhkhouhg581r","resource_type":"Listeners","count":2,"file":"alb_ListListeners_us-east-1_default.json"},{"service":"alb","region":"us-east-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-j86acfj7d9v6nbp9cm","resource_type":"Listeners","count":2,"file":"alb_ListListeners_us-east-1_default.json"},{"service":"alb","region":"us-east-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-uplxji5wdnojp1jwhw","resource_type":"Listeners","count":2,"file":"alb_ListListeners_us-east-1_default.json"},{"service":"alb","region":"ap-southeast-1","operation":"ListLoadBalancers","iterated":"","resource_type":"LoadBalancers","count":3,"file":"alb_ListLoadBalancers_ap-southeast-1_default.json"},{"service":"alb","region":"eu-central-1","operation":"ListLoadBalancers","iterated":"","resource_type":"LoadBalancers","count":2,"file":"alb_ListLoadBalancers_eu-central-1_default.json"},{"service":"alb","region":"us-east-1","operation":"ListLoadBalancers","iterated":"","resource_type":"LoadBalancers","count":5,"file":"alb_ListLoadBalancers_us-east-1_default.json"},{"service":"alb","region":"ap-southeast-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-bh7zurrk70jplh38f9","resource_type":"ServerGroups","count":3,"file":"alb_ListServerGroups_ap-southeast-1_default.json"},{"service":"alb","region":"ap-southeast-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-mo73m3w07ce6ho8h8w","resource_type":"ServerGroups","count":3,"file":"alb_ListServerGroups_ap-southeast-1_default.json"},{"service":"alb","region":"ap-southeast-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-f0sujr02vw73uy217q","resource_type":"ServerGroups","count":3,"file":"alb_ListServerGroups_ap-southeast-1_default.json"},{"service":"alb","region":"eu-central-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-trmeplerapik4add06","resource_type":"ServerGroups","count":2,"file":"alb_ListServerGroups_eu-central-1_default.json"},{"service":"alb","region":"eu-central-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-fi74nkafmxipvdts4n","resource_type":"ServerGroups","count":2,"file":"alb_ListServerGroups_eu-central-1_default.json"},{"service":"alb","region":"us-east-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-c6yfbamjr658vqgc9l","resource_type":"ServerGroups","count":6,"file":"alb_ListServerGroups_us-east-1_default.json"},{"service":"alb","region":"us-east-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-umq151lp30fq9spf2o","resource_type":"ServerGroups","count":6,"file":"alb_ListServerGroups_us-east-1_default.json"},{"service":"alb","region":"us-east-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-76nen1zhkhouhg581r","resource_type":"ServerGroups","count":6,"file":"alb_ListServerGroups_us-east-1_default.json"},{"service":"alb","region":"us-east-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-j86acfj7d9v6nbp9cm","resource_type":"ServerGroups","count":6,"file":"alb_ListServerGroups_us-east-1_default.json"},{"service":"alb","region":"us-east-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-uplxji5wdnojp1jwhw","resource_type":"ServerGroups","count":6,"file":"alb_ListServerGroups_us-east-1_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainGroups","iterated":"","resource_type":"DomainGroups","count":3,"file":"alidns_DescribeDomainGroups_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=visiondigital.mobi","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=karldsp.com","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=adkiteflow.com","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=vidnexent.com","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=aiorbitpro.com","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=sparknovex.com","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=engageadmedia.cloud","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=getstart.mobi","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=cloudgamehub.top","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=gamenews.mobi","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=minmov.com","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=story100.top","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=wall100.top","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=center100.top","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=vikingmedia.mobi","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=flymobi.biz","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=flymobiadx.com","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=flymobidsp.com","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=flymobi.top","resource_type":"DomainLogs","count":13,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=visiondigital.mobi","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=karldsp.com","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=adkiteflow.com","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=vidnexent.com","resource_type":"DomainNs","count":0,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=aiorbitpro.com","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=sparknovex.com","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=engageadmedia.cloud","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=getstart.mobi","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=cloudgamehub.top","resource_type":"DomainNs","count":0,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=gamenews.mobi","resource_type":"DomainNs","count":0,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=minmov.com","resource_type":"DomainNs","count":0,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=story100.top","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=wall100.top","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=center100.top","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=vikingmedia.mobi","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=flymobi.biz","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=flymobiadx.com","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=flymobidsp.com","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=flymobi.top","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=visiondigital.mobi","resource_type":"DomainRecords","count":7,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=karldsp.com","resource_type":"DomainRecords","count":3,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=adkiteflow.com","resource_type":"DomainRecords","count":3,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=vidnexent.com","resource_type":"DomainRecords","count":3,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=aiorbitpro.com","resource_type":"DomainRecords","count":3,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=sparknovex.com","resource_type":"DomainRecords","count":3,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=engageadmedia.cloud","resource_type":"DomainRecords","count":0,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=getstart.mobi","resource_type":"DomainRecords","count":24,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=cloudgamehub.top","resource_type":"DomainRecords","count":2,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=gamenews.mobi","resource_type":"DomainRecords","count":3,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=minmov.com","resource_type":"DomainRecords","count":2,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=story100.top","resource_type":"DomainRecords","count":2,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=wall100.top","resource_type":"DomainRecords","count":2,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=center100.top","resource_type":"DomainRecords","count":14,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=vikingmedia.mobi","resource_type":"DomainRecords","count":62,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=flymobi.biz","resource_type":"DomainRecords","count":34,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=flymobiadx.com","resource_type":"DomainRecords","count":15,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=flymobidsp.com","resource_type":"DomainRecords","count":26,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=flymobi.top","resource_type":"DomainRecords","count":31,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeDomains","iterated":"","resource_type":"Domains","count":19,"file":"alidns_DescribeDomains_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=visiondigital.mobi","resource_type":"RecordLogs","count":36,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=karldsp.com","resource_type":"RecordLogs","count":5,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=adkiteflow.com","resource_type":"RecordLogs","count":5,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=vidnexent.com","resource_type":"RecordLogs","count":5,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=aiorbitpro.com","resource_type":"RecordLogs","count":5,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=sparknovex.com","resource_type":"RecordLogs","count":5,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=engageadmedia.cloud","resource_type":"RecordLogs","count":0,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=getstart.mobi","resource_type":"RecordLogs","count":102,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=cloudgamehub.top","resource_type":"RecordLogs","count":2,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=gamenews.mobi","resource_type":"RecordLogs","count":3,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=minmov.com","resource_type":"RecordLogs","count":2,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=story100.top","resource_type":"RecordLogs","count":2,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=wall100.top","resource_type":"RecordLogs","count":2,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=center100.top","resource_type":"RecordLogs","count":39,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=vikingmedia.mobi","resource_type":"RecordLogs","count":275,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=flymobi.biz","resource_type":"RecordLogs","count":49,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=flymobiadx.com","resource_type":"RecordLogs","count":7,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=flymobidsp.com","resource_type":"RecordLogs","count":16,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=flymobi.top","resource_type":"RecordLogs","count":51,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","region":"global","operation":"DescribeSupportLines","iterated":"","resource_type":"SupportLines","count":782,"file":"alidns_DescribeSupportLines_global_default.json"},{"service":"alikafka","region":"ap-southeast-1","operation":"GetConsumerList","iterated":"InstanceId=alikafka_pre-cn-3ic3z8h11003","resource_type":"Consumers","count":3,"file":"alikafka_GetConsumerList_ap-southeast-1_default.json"},{"service":"alikafka","region":"ap-southeast-1","operation":"GetConsumerList","iterated":"InstanceId=alikafka_pre-cn-gpz3swjgr001","resource_type":"Consumers","count":0,"file":"alikafka_GetConsumerList_ap-southeast-1_default.json"},{"service":"alikafka","region":"ap-southeast-1","operation":"GetConsumerList","iterated":"InstanceId=alikafka_pre-cn-zim3sr00l003","resource_type":"Consumers","count":0,"file":"alikafka_GetConsumerList_ap-southeast-1_default.json"},{"service":"alikafka","region":"eu-central-1","operation":"GetConsumerList","iterated":"InstanceId=alikafka_pre-cn-wuf3z8ri3003","resource_type":"Consumers","count":1,"file":"alikafka_GetConsumerList_eu-central-1_default.json"},{"service":"alikafka","region":"eu-central-1","operation":"GetConsumerList","iterated":"InstanceId=alikafka_pre-cn-tk23tmzhl001","resource_type":"Consumers","count":0,"file":"alikafka_GetConsumerList_eu-central-1_default.json"},{"service":"alikafka","region":"us-east-1","operation":"GetConsumerList","iterated":"InstanceId=alikafka_pre-cn-8ly3z8wg9001","resource_type":"Consumers","count":1,"file":"alikafka_GetConsumerList_us-east-1_default.json"},{"service":"alikafka","region":"us-east-1","operation":"GetConsumerList","iterated":"InstanceId=alikafka_pre-cn-to33sr0pa004","resource_type":"Consumers","count":0,"file":"alikafka_GetConsumerList_us-east-1_default.json"},{"service":"alikafka","region":"ap-southeast-1","operation":"GetInstanceList","iterated":"","resource_type":"Instances","count":3,"file":"alikafka_GetInstanceList_ap-southeast-1_default.json"},{"service":"alikafka","region":"eu-central-1","operation":"GetInstanceList","iterated":"","resource_type":"Instances","count":2,"file":"alikafka_GetInstanceList_eu-central-1_default.json"},{"service":"alikafka","region":"us-east-1","operation":"GetInstanceList","iterated":"","resource_type":"Instances","count":2,"file":"alikafka_GetInstanceList_us-east-1_default.json"},{"service":"alikafka","region":"ap-southeast-1","operation":"GetTopicList","iterated":"InstanceId=alikafka_pre-cn-3ic3z8h11003","resource_type":"Topics","count":3,"file":"alikafka_GetTopicList_ap-southeast-1_default.json"},{"service":"alikafka","region":"ap-southeast-1","operation":"GetTopicList","iterated":"InstanceId=alikafka_pre-cn-gpz3swjgr001","resource_type":"Topics","count":0,"file":"alikafka_GetTopicList_ap-southeast-1_default.json"},{"service":"alikafka","region":"ap-southeast-1","operation":"GetTopicList","iterated":"InstanceId=alikafka_pre-cn-zim3sr00l003","resource_type":"Topics","count":0,"file":"alikafka_GetTopicList_ap-southeast-1_default.json"},{"service":"alikafka","region":"eu-central-1","operation":"GetTopicList","iterated":"InstanceId=alikafka_pre-cn-wuf3z8ri3003","resource_type":"Topics","count":1,"file":"alikafka_GetTopicList_eu-central-1_default.json"},{"service":"alikafka","region":"eu-central-1","operation":"GetTopicList","iterated":"InstanceId=alikafka_pre-cn-tk23tmzhl001","resource_type":"Topics","count":0,"file":"alikafka_GetTopicList_eu-central-1_default.json"},{"service":"alikafka","region":"us-east-1","operation":"GetTopicList","iterated":"InstanceId=alikafka_pre-cn-8ly3z8wg9001","resource_type":"Topics","count":1,"file":"alikafka_GetTopicList_us-east-1_default.json"},{"service":"alikafka","region":"us-east-1","operation":"GetTopicList","iterated":"InstanceId=alikafka_pre-cn-to33sr0pa004","resource_type":"Topics","count":0,"file":"alikafka_GetTopicList_us-east-1_default.json"},{"service":"cdn","region":"global","operation":"DescribeUserDomains","iterated":"","resource_type":"Domains","count":2,"file":"cdn_DescribeUserDomains_global_default.json"},{"service":"cr","region":"ap-northeast-1","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_ap-northeast-1_default.json"},{"service":"cr","region":"ap-southeast-1","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_ap-southeast-1_default.json"},{"service":"cr","region":"ap-southeast-3","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_ap-southeast-3_default.json"},{"service":"cr","region":"ap-southeast-5","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_ap-southeast-5_default.json"},{"service":"cr","region":"cn-beijing","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_cn-beijing_default.json"},{"service":"cr","region":"cn-hangzhou","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_cn-hangzhou_default.json"},{"service":"cr","region":"cn-hongkong","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_cn-hongkong_default.json"},{"service":"cr","region":"cn-huhehaote","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_cn-huhehaote_default.json"},{"service":"cr","region":"cn-qingdao","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_cn-qingdao_default.json"},{"service":"cr","region":"cn-shanghai","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_cn-shanghai_default.json"},{"service":"cr","region":"cn-shenzhen","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_cn-shenzhen_default.json"},{"service":"cr","region":"cn-zhangjiakou","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_cn-zhangjiakou_default.json"},{"service":"cr","region":"eu-central-1","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_eu-central-1_default.json"},{"service":"cr","region":"me-east-1","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_me-east-1_default.json"},{"service":"cr","region":"us-east-1","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_us-east-1_default.json"},{"service":"cr","region":"us-west-1","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_us-west-1_default.json"},{"service":"domain","region":"global","operation":"QueryDomainList","iterated":"","resource_type":"Domains","count":9,"file":"domain_QueryDomainList_global_default.json"},{"service":"ecs","region":"ap-northeast-1","operation":"DescribeDisks","iterated":"","resource_type":"Disks","count":1,"file":"ecs_DescribeDisks_ap-northeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeDisks","iterated":"","resource_type":"Disks","count":257,"file":"ecs_DescribeDisks_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-3","operation":"DescribeDisks","iterated":"","resource_type":"Disks","count":8,"file":"ecs_DescribeDisks_ap-southeast-3_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeDisks","iterated":"","resource_type":"Disks","count":16,"file":"ecs_DescribeDisks_eu-central-1_default.json"},{"service":"ecs","region":"me-east-1","operation":"DescribeDisks","iterated":"","resource_type":"Disks","count":3,"file":"ecs_DescribeDisks_me-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeDisks","iterated":"","resource_type":"Disks","count":48,"file":"ecs_DescribeDisks_us-east-1_default.json"},{"service":"ecs","region":"ap-northeast-1","operation":"DescribeImages","iterated":"","resource_type":"Images","count":298,"file":"ecs_DescribeImages_ap-northeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeImages","iterated":"","resource_type":"Images","count":495,"file":"ecs_DescribeImages_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-3","operation":"DescribeImages","iterated":"","resource_type":"Images","count":298,"file":"ecs_DescribeImages_ap-southeast-3_default.json"},{"service":"ecs","region":"ap-southeast-5","operation":"DescribeImages","iterated":"","resource_type":"Images","count":297,"file":"ecs_DescribeImages_ap-southeast-5_default.json"},{"service":"ecs","region":"cn-beijing","operation":"DescribeImages","iterated":"","resource_type":"Images","count":307,"file":"ecs_DescribeImages_cn-beijing_default.json"},{"service":"ecs","region":"cn-hangzhou","operation":"DescribeImages","iterated":"","resource_type":"Images","count":307,"file":"ecs_DescribeImages_cn-hangzhou_default.json"},{"service":"ecs","region":"cn-hongkong","operation":"DescribeImages","iterated":"","resource_type":"Images","count":304,"file":"ecs_DescribeImages_cn-hongkong_default.json"},{"service":"ecs","region":"cn-huhehaote","operation":"DescribeImages","iterated":"","resource_type":"Images","count":305,"file":"ecs_DescribeImages_cn-huhehaote_default.json"},{"service":"ecs","region":"cn-qingdao","operation":"DescribeImages","iterated":"","resource_type":"Images","count":303,"file":"ecs_DescribeImages_cn-qingdao_default.json"},{"service":"ecs","region":"cn-shanghai","operation":"DescribeImages","iterated":"","resource_type":"Images","count":306,"file":"ecs_DescribeImages_cn-shanghai_default.json"},{"service":"ecs","region":"cn-shenzhen","operation":"DescribeImages","iterated":"","resource_type":"Images","count":305,"file":"ecs_DescribeImages_cn-shenzhen_default.json"},{"service":"ecs","region":"cn-zhangjiakou","operation":"DescribeImages","iterated":"","resource_type":"Images","count":305,"file":"ecs_DescribeImages_cn-zhangjiakou_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeImages","iterated":"","resource_type":"Images","count":325,"file":"ecs_DescribeImages_eu-central-1_default.json"},{"service":"ecs","region":"me-east-1","operation":"DescribeImages","iterated":"","resource_type":"Images","count":301,"file":"ecs_DescribeImages_me-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeImages","iterated":"","resource_type":"Images","count":358,"file":"ecs_DescribeImages_us-east-1_default.json"},{"service":"ecs","region":"us-west-1","operation":"DescribeImages","iterated":"","resource_type":"Images","count":298,"file":"ecs_DescribeImages_us-west-1_default.json"},{"service":"ecs","region":"ap-northeast-1","operation":"DescribeInstanceStatus","iterated":"","resource_type":"InstanceStatuses","count":1,"file":"ecs_DescribeInstanceStatus_ap-northeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeInstanceStatus","iterated":"","resource_type":"InstanceStatuses","count":138,"file":"ecs_DescribeInstanceStatus_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-3","operation":"DescribeInstanceStatus","iterated":"","resource_type":"InstanceStatuses","count":8,"file":"ecs_DescribeInstanceStatus_ap-southeast-3_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeInstanceStatus","iterated":"","resource_type":"InstanceStatuses","count":13,"file":"ecs_DescribeInstanceStatus_eu-central-1_default.json"},{"service":"ecs","region":"me-east-1","operation":"DescribeInstanceStatus","iterated":"","resource_type":"InstanceStatuses","count":3,"file":"ecs_DescribeInstanceStatus_me-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeInstanceStatus","iterated":"","resource_type":"InstanceStatuses","count":33,"file":"ecs_DescribeInstanceStatus_us-east-1_default.json"},{"service":"ecs","region":"ap-northeast-1","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":185,"file":"ecs_DescribeInstanceTypeFamilies_ap-northeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":255,"file":"ecs_DescribeInstanceTypeFamilies_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-3","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":158,"file":"ecs_DescribeInstanceTypeFamilies_ap-southeast-3_default.json"},{"service":"ecs","region":"ap-southeast-5","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":192,"file":"ecs_DescribeInstanceTypeFamilies_ap-southeast-5_default.json"},{"service":"ecs","region":"cn-beijing","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":397,"file":"ecs_DescribeInstanceTypeFamilies_cn-beijing_default.json"},{"service":"ecs","region":"cn-hangzhou","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":375,"file":"ecs_DescribeInstanceTypeFamilies_cn-hangzhou_default.json"},{"service":"ecs","region":"cn-hongkong","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":218,"file":"ecs_DescribeInstanceTypeFamilies_cn-hongkong_default.json"},{"service":"ecs","region":"cn-huhehaote","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":100,"file":"ecs_DescribeInstanceTypeFamilies_cn-huhehaote_default.json"},{"service":"ecs","region":"cn-qingdao","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":129,"file":"ecs_DescribeInstanceTypeFamilies_cn-qingdao_default.json"},{"service":"ecs","region":"cn-shanghai","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":405,"file":"ecs_DescribeInstanceTypeFamilies_cn-shanghai_default.json"},{"service":"ecs","region":"cn-shenzhen","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":323,"file":"ecs_DescribeInstanceTypeFamilies_cn-shenzhen_default.json"},{"service":"ecs","region":"cn-zhangjiakou","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":242,"file":"ecs_DescribeInstanceTypeFamilies_cn-zhangjiakou_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":212,"file":"ecs_DescribeInstanceTypeFamilies_eu-central-1_default.json"},{"service":"ecs","region":"me-east-1","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":101,"file":"ecs_DescribeInstanceTypeFamilies_me-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":184,"file":"ecs_DescribeInstanceTypeFamilies_us-east-1_default.json"},{"service":"ecs","region":"us-west-1","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":150,"file":"ecs_DescribeInstanceTypeFamilies_us-west-1_default.json"},{"service":"ecs","region":"ap-northeast-1","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_ap-northeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-3","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_ap-southeast-3_default.json"},{"service":"ecs","region":"ap-southeast-5","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_ap-southeast-5_default.json"},{"service":"ecs","region":"cn-beijing","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_cn-beijing_default.json"},{"service":"ecs","region":"cn-hangzhou","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_cn-hangzhou_default.json"},{"service":"ecs","region":"cn-hongkong","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_cn-hongkong_default.json"},{"service":"ecs","region":"cn-huhehaote","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_cn-huhehaote_default.json"},{"service":"ecs","region":"cn-qingdao","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_cn-qingdao_default.json"},{"service":"ecs","region":"cn-shanghai","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_cn-shanghai_default.json"},{"service":"ecs","region":"cn-shenzhen","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_cn-shenzhen_default.json"},{"service":"ecs","region":"cn-zhangjiakou","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_cn-zhangjiakou_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_eu-central-1_default.json"},{"service":"ecs","region":"me-east-1","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_me-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_us-east-1_default.json"},{"service":"ecs","region":"us-west-1","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_us-west-1_default.json"},{"service":"ecs","region":"ap-northeast-1","operation":"DescribeInstances","iterated":"","resource_type":"Instances","count":1,"file":"ecs_DescribeInstances_ap-northeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeInstances","iterated":"","resource_type":"Instances","count":138,"file":"ecs_DescribeInstances_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-3","operation":"DescribeInstances","iterated":"","resource_type":"Instances","count":8,"file":"ecs_DescribeInstances_ap-southeast-3_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeInstances","iterated":"","resource_type":"Instances","count":13,"file":"ecs_DescribeInstances_eu-central-1_default.json"},{"service":"ecs","region":"me-east-1","operation":"DescribeInstances","iterated":"","resource_type":"Instances","count":3,"file":"ecs_DescribeInstances_me-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeInstances","iterated":"","resource_type":"Instances","count":33,"file":"ecs_DescribeInstances_us-east-1_default.json"},{"service":"ecs","region":"ap-northeast-1","operation":"DescribeKeyPairs","iterated":"","resource_type":"KeyPairs","count":3,"file":"ecs_DescribeKeyPairs_ap-northeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeKeyPairs","iterated":"","resource_type":"KeyPairs","count":12,"file":"ecs_DescribeKeyPairs_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-3","operation":"DescribeKeyPairs","iterated":"","resource_type":"KeyPairs","count":1,"file":"ecs_DescribeKeyPairs_ap-southeast-3_default.json"},{"service":"ecs","region":"ap-southeast-5","operation":"DescribeKeyPairs","iterated":"","resource_type":"KeyPairs","count":1,"file":"ecs_DescribeKeyPairs_ap-southeast-5_default.json"},{"service":"ecs","region":"cn-beijing","operation":"DescribeKeyPairs","iterated":"","resource_type":"KeyPairs","count":1,"file":"ecs_DescribeKeyPairs_cn-beijing_default.json"},{"service":"ecs","region":"cn-hongkong","operation":"DescribeKeyPairs","iterated":"","resource_type":"KeyPairs","count":3,"file":"ecs_DescribeKeyPairs_cn-hongkong_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeKeyPairs","iterated":"","resource_type":"KeyPairs","count":4,"file":"ecs_DescribeKeyPairs_eu-central-1_default.json"},{"service":"ecs","region":"me-east-1","operation":"DescribeKeyPairs","iterated":"","resource_type":"KeyPairs","count":1,"file":"ecs_DescribeKeyPairs_me-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeKeyPairs","iterated":"","resource_type":"KeyPairs","count":8,"file":"ecs_DescribeKeyPairs_us-east-1_default.json"},{"service":"ecs","region":"ap-northeast-1","operation":"DescribeNetworkInterfaces","iterated":"","resource_type":"NetworkInterfaces","count":1,"file":"ecs_DescribeNetworkInterfaces_ap-northeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeNetworkInterfaces","iterated":"","resource_type":"NetworkInterfaces","count":204,"file":"ecs_DescribeNetworkInterfaces_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-3","operation":"DescribeNetworkInterfaces","iterated":"","resource_type":"NetworkInterfaces","count":8,"file":"ecs_DescribeNetworkInterfaces_ap-southeast-3_default.json"},{"service":"ecs","region":"cn-beijing","operation":"DescribeNetworkInterfaces","iterated":"","resource_type":"NetworkInterfaces","count":1,"file":"ecs_DescribeNetworkInterfaces_cn-beijing_default.json"},{"service":"ecs","region":"cn-hangzhou","operation":"DescribeNetworkInterfaces","iterated":"","resource_type":"NetworkInterfaces","count":1,"file":"ecs_DescribeNetworkInterfaces_cn-hangzhou_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeNetworkInterfaces","iterated":"","resource_type":"NetworkInterfaces","count":20,"file":"ecs_DescribeNetworkInterfaces_eu-central-1_default.json"},{"service":"ecs","region":"me-east-1","operation":"DescribeNetworkInterfaces","iterated":"","resource_type":"NetworkInterfaces","count":3,"file":"ecs_DescribeNetworkInterfaces_me-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeNetworkInterfaces","iterated":"","resource_type":"NetworkInterfaces","count":61,"file":"ecs_DescribeNetworkInterfaces_us-east-1_default.json"},{"service":"ecs","region":"ap-northeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-6we5r830xp0k9rh0w52k","resource_type":"SecurityGroupAttribute","count":5,"file":"ecs_DescribeSecurityGroupAttribute_ap-northeast-1_default.json"},{"service":"ecs","region":"ap-northeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-6we6fu3pg8lcgiz3lprl","resource_type":"SecurityGroupAttribute","count":6,"file":"ecs_DescribeSecurityGroupAttribute_ap-northeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4n3rlaby3mbtwnsxjm3","resource_type":"SecurityGroupAttribute","count":16,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4n4xyaz00ymgrbr8lq2","resource_type":"SecurityGroupAttribute","count":5,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4n9wvf9nwp2hw1nfiv2","resource_type":"SecurityGroupAttribute","count":5,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4nhgnmgpinxvs1gyac5","resource_type":"SecurityGroupAttribute","count":3,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4nakgeaciuff8yfm5nt","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4n57thgaav2x9kqt2kv","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4n0wp4hqwsv58idyrtk","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4nj7dtkif5n4kdo3xj2","resource_type":"SecurityGroupAttribute","count":6,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4n3wnmw5ozuskd48ql9","resource_type":"SecurityGroupAttribute","count":3,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4na3skukzsaum3577so","resource_type":"SecurityGroupAttribute","count":9,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4neh4wxmi2zk14c3mqh","resource_type":"SecurityGroupAttribute","count":10,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4n9pzpkq0bzfy1iysar","resource_type":"SecurityGroupAttribute","count":23,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4n0c593vf5m87n6x17m","resource_type":"SecurityGroupAttribute","count":8,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4n7l6eaiwmfmdzka6ez","resource_type":"SecurityGroupAttribute","count":3,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4n5hjv1adkta5t38k4x","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4nffa97ik1pbx6plwor","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4nffa97ik1muuxhkq8y","resource_type":"SecurityGroupAttribute","count":35,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4n28hraoept5p7uecq6","resource_type":"SecurityGroupAttribute","count":10,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4n390qr6yldo488aejh","resource_type":"SecurityGroupAttribute","count":4,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4n9q1doqvdaeyr6uw1e","resource_type":"SecurityGroupAttribute","count":7,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4na5cr1f2hxrxmrhbe9","resource_type":"SecurityGroupAttribute","count":21,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-t4ng6jwex354dj03aah5","resource_type":"SecurityGroupAttribute","count":68,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-3","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-8ps2f6ux9ozxgdq4mvfe","resource_type":"SecurityGroupAttribute","count":6,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-3_default.json"},{"service":"ecs","region":"ap-southeast-5","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-k1ab5a6y8qfx9ogsa5s1","resource_type":"SecurityGroupAttribute","count":6,"file":"ecs_DescribeSecurityGroupAttribute_ap-southeast-5_default.json"},{"service":"ecs","region":"cn-beijing","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-2zef4qs53jklbyhecr5n","resource_type":"SecurityGroupAttribute","count":6,"file":"ecs_DescribeSecurityGroupAttribute_cn-beijing_default.json"},{"service":"ecs","region":"cn-hangzhou","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-bp183onwx3cfuszwng5o","resource_type":"SecurityGroupAttribute","count":1,"file":"ecs_DescribeSecurityGroupAttribute_cn-hangzhou_default.json"},{"service":"ecs","region":"cn-hongkong","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-j6c9n6i5h8cl0lf3oycg","resource_type":"SecurityGroupAttribute","count":5,"file":"ecs_DescribeSecurityGroupAttribute_cn-hongkong_default.json"},{"service":"ecs","region":"cn-hongkong","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-j6c6ecodvi5tkoqhck0o","resource_type":"SecurityGroupAttribute","count":6,"file":"ecs_DescribeSecurityGroupAttribute_cn-hongkong_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-gw8i5ow77zus2rlml8zz","resource_type":"SecurityGroupAttribute","count":8,"file":"ecs_DescribeSecurityGroupAttribute_eu-central-1_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-gw8eip5c8opzqfxuo99a","resource_type":"SecurityGroupAttribute","count":8,"file":"ecs_DescribeSecurityGroupAttribute_eu-central-1_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-gw8jblfn6ptb5eyroi8l","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_eu-central-1_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-gw886jij84drv2b87nbw","resource_type":"SecurityGroupAttribute","count":9,"file":"ecs_DescribeSecurityGroupAttribute_eu-central-1_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-gw82dtn1bmtqsotrenrn","resource_type":"SecurityGroupAttribute","count":6,"file":"ecs_DescribeSecurityGroupAttribute_eu-central-1_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-gw875lx2xwil0zolxoqb","resource_type":"SecurityGroupAttribute","count":6,"file":"ecs_DescribeSecurityGroupAttribute_eu-central-1_default.json"},{"service":"ecs","region":"me-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-eb3acm708opv4dexem7s","resource_type":"SecurityGroupAttribute","count":7,"file":"ecs_DescribeSecurityGroupAttribute_me-east-1_default.json"},{"service":"ecs","region":"me-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-eb3j4hcqwlz8yhkqkhkq","resource_type":"SecurityGroupAttribute","count":6,"file":"ecs_DescribeSecurityGroupAttribute_me-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi7ok0p6nt0jkqhbvoc","resource_type":"SecurityGroupAttribute","count":8,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi1u2bluckrcwduii8u","resource_type":"SecurityGroupAttribute","count":8,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xidml67iqaczot3r4kx","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xig1aj4ujgyyp30qb40","resource_type":"SecurityGroupAttribute","count":3,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xidgycrnoo7t6194yhz","resource_type":"SecurityGroupAttribute","count":20,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xifyb2hxmdcgigbtcpb","resource_type":"SecurityGroupAttribute","count":16,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi7qfhrupwt2utkhe97","resource_type":"SecurityGroupAttribute","count":9,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xidsdkjl8srpjorqvq8","resource_type":"SecurityGroupAttribute","count":16,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xiiqf5su0xm265k56ke","resource_type":"SecurityGroupAttribute","count":6,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi1m1r1exucr2gfhw8f","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi1m1r1exuceugjdnoi","resource_type":"SecurityGroupAttribute","count":18,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi69vre76jnnur3vulw","resource_type":"SecurityGroupAttribute","count":10,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi9e42kn4hoq1jjyglw","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xiak685sbycseg3lwuc","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi7ud6pvh35gji37eh8","resource_type":"SecurityGroupAttribute","count":62,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xiflsfqi7zp9qcvlskz","resource_type":"SecurityGroupAttribute","count":6,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi3tkxa9jtux0wfqcnd","resource_type":"SecurityGroupAttribute","count":11,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xif4juu0mjmv24z3t9l","resource_type":"SecurityGroupAttribute","count":0,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","region":"ap-northeast-1","operation":"DescribeSecurityGroups","iterated":"","resource_type":"SecurityGroups","count":2,"file":"ecs_DescribeSecurityGroups_ap-northeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSecurityGroups","iterated":"","resource_type":"SecurityGroups","count":22,"file":"ecs_DescribeSecurityGroups_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-3","operation":"DescribeSecurityGroups","iterated":"","resource_type":"SecurityGroups","count":1,"file":"ecs_DescribeSecurityGroups_ap-southeast-3_default.json"},{"service":"ecs","region":"ap-southeast-5","operation":"DescribeSecurityGroups","iterated":"","resource_type":"SecurityGroups","count":1,"file":"ecs_DescribeSecurityGroups_ap-southeast-5_default.json"},{"service":"ecs","region":"cn-beijing","operation":"DescribeSecurityGroups","iterated":"","resource_type":"SecurityGroups","count":1,"file":"ecs_DescribeSecurityGroups_cn-beijing_default.json"},{"service":"ecs","region":"cn-hangzhou","operation":"DescribeSecurityGroups","iterated":"","resource_type":"SecurityGroups","count":1,"file":"ecs_DescribeSecurityGroups_cn-hangzhou_default.json"},{"service":"ecs","region":"cn-hongkong","operation":"DescribeSecurityGroups","iterated":"","resource_type":"SecurityGroups","count":2,"file":"ecs_DescribeSecurityGroups_cn-hongkong_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeSecurityGroups","iterated":"","resource_type":"SecurityGroups","count":6,"file":"ecs_DescribeSecurityGroups_eu-central-1_default.json"},{"service":"ecs","region":"me-east-1","operation":"DescribeSecurityGroups","iterated":"","resource_type":"SecurityGroups","count":2,"file":"ecs_DescribeSecurityGroups_me-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSecurityGroups","iterated":"","resource_type":"SecurityGroups","count":18,"file":"ecs_DescribeSecurityGroups_us-east-1_default.json"},{"service":"ecs","region":"ap-northeast-1","operation":"DescribeSnapshots","iterated":"","resource_type":"Snapshots","count":3,"file":"ecs_DescribeSnapshots_ap-northeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeSnapshots","iterated":"","resource_type":"Snapshots","count":231,"file":"ecs_DescribeSnapshots_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-3","operation":"DescribeSnapshots","iterated":"","resource_type":"Snapshots","count":3,"file":"ecs_DescribeSnapshots_ap-southeast-3_default.json"},{"service":"ecs","region":"ap-southeast-5","operation":"DescribeSnapshots","iterated":"","resource_type":"Snapshots","count":5,"file":"ecs_DescribeSnapshots_ap-southeast-5_default.json"},{"service":"ecs","region":"cn-hongkong","operation":"DescribeSnapshots","iterated":"","resource_type":"Snapshots","count":3,"file":"ecs_DescribeSnapshots_cn-hongkong_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeSnapshots","iterated":"","resource_type":"Snapshots","count":31,"file":"ecs_DescribeSnapshots_eu-central-1_default.json"},{"service":"ecs","region":"me-east-1","operation":"DescribeSnapshots","iterated":"","resource_type":"Snapshots","count":7,"file":"ecs_DescribeSnapshots_me-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeSnapshots","iterated":"","resource_type":"Snapshots","count":72,"file":"ecs_DescribeSnapshots_us-east-1_default.json"},{"service":"ecs","region":"ap-northeast-1","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":4,"file":"ecs_DescribeZones_ap-northeast-1_default.json"},{"service":"ecs","region":"ap-southeast-1","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":4,"file":"ecs_DescribeZones_ap-southeast-1_default.json"},{"service":"ecs","region":"ap-southeast-3","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":3,"file":"ecs_DescribeZones_ap-southeast-3_default.json"},{"service":"ecs","region":"ap-southeast-5","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":3,"file":"ecs_DescribeZones_ap-southeast-5_default.json"},{"service":"ecs","region":"cn-beijing","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":12,"file":"ecs_DescribeZones_cn-beijing_default.json"},{"service":"ecs","region":"cn-hangzhou","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":8,"file":"ecs_DescribeZones_cn-hangzhou_default.json"},{"service":"ecs","region":"cn-hongkong","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":3,"file":"ecs_DescribeZones_cn-hongkong_default.json"},{"service":"ecs","region":"cn-huhehaote","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":2,"file":"ecs_DescribeZones_cn-huhehaote_default.json"},{"service":"ecs","region":"cn-qingdao","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":2,"file":"ecs_DescribeZones_cn-qingdao_default.json"},{"service":"ecs","region":"cn-shanghai","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":12,"file":"ecs_DescribeZones_cn-shanghai_default.json"},{"service":"ecs","region":"cn-shenzhen","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":6,"file":"ecs_DescribeZones_cn-shenzhen_default.json"},{"service":"ecs","region":"cn-zhangjiakou","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":3,"file":"ecs_DescribeZones_cn-zhangjiakou_default.json"},{"service":"ecs","region":"eu-central-1","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":3,"file":"ecs_DescribeZones_eu-central-1_default.json"},{"service":"ecs","region":"me-east-1","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":2,"file":"ecs_DescribeZones_me-east-1_default.json"},{"service":"ecs","region":"us-east-1","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":2,"file":"ecs_DescribeZones_us-east-1_default.json"},{"service":"ecs","region":"us-west-1","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":2,"file":"ecs_DescribeZones_us-west-1_default.json"},{"service":"oss","region":"ap-northeast-1","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_ap-northeast-1_default.json"},{"service":"oss","region":"ap-southeast-1","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_ap-southeast-1_default.json"},{"service":"oss","region":"ap-southeast-3","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_ap-southeast-3_default.json"},{"service":"oss","region":"ap-southeast-5","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_ap-southeast-5_default.json"},{"service":"oss","region":"cn-beijing","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_cn-beijing_default.json"},{"service":"oss","region":"cn-hangzhou","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_cn-hangzhou_default.json"},{"service":"oss","region":"cn-hongkong","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_cn-hongkong_default.json"},{"service":"oss","region":"cn-huhehaote","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_cn-huhehaote_default.json"},{"service":"oss","region":"cn-qingdao","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_cn-qingdao_default.json"},{"service":"oss","region":"cn-shanghai","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_cn-shanghai_default.json"},{"service":"oss","region":"cn-shenzhen","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_cn-shenzhen_default.json"},{"service":"oss","region":"cn-zhangjiakou","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_cn-zhangjiakou_default.json"},{"service":"oss","region":"eu-central-1","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_eu-central-1_default.json"},{"service":"oss","region":"me-east-1","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_me-east-1_default.json"},{"service":"oss","region":"us-east-1","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_us-east-1_default.json"},{"service":"oss","region":"us-west-1","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_us-west-1_default.json"},{"service":"rds","region":"us-east-1","operation":"DescribeAccounts","iterated":"DBInstanceId=rm-0xi4z19bu67kmqph6","resource_type":"DBAccounts","count":7,"file":"rds_DescribeAccounts_us-east-1_default.json"},{"service":"rds","region":"us-east-1","operation":"DescribeAccounts","iterated":"DBInstanceId=rm-0xig8l6102l11wmv4","resource_type":"DBAccounts","count":2,"file":"rds_DescribeAccounts_us-east-1_default.json"},{"service":"rds","region":"us-east-1","operation":"DescribeAccounts","iterated":"DBInstanceId=rm-0xim5bttukvb2f191","resource_type":"DBAccounts","count":2,"file":"rds_DescribeAccounts_us-east-1_default.json"},{"service":"rds","region":"us-east-1","operation":"DescribeDBInstanceAttribute","iterated":"DBInstanceId=rm-0xi4z19bu67kmqph6","resource_type":"DBInstanceAttributes","count":1,"file":"rds_DescribeDBInstanceAttribute_us-east-1_default.json"},{"service":"rds","region":"us-east-1","operation":"DescribeDBInstanceAttribute","iterated":"DBInstanceId=rm-0xig8l6102l11wmv4","resource_type":"DBInstanceAttributes","count":1,"file":"rds_DescribeDBInstanceAttribute_us-east-1_default.json"},{"service":"rds","region":"us-east-1","operation":"DescribeDBInstanceAttribute","iterated":"DBInstanceId=rm-0xim5bttukvb2f191","resource_type":"DBInstanceAttributes","count":1,"file":"rds_DescribeDBInstanceAttribute_us-east-1_default.json"},{"service":"rds","region":"us-east-1","operation":"DescribeDBInstances","iterated":"","resource_type":"DBInstances","count":3,"file":"rds_DescribeDBInstances_us-east-1_default.json"},{"service":"rds","region":"us-east-1","operation":"DescribeDatabases","iterated":"DBInstanceId=rm-0xi4z19bu67kmqph6","resource_type":"Databases","count":5,"file":"rds_DescribeDatabases_us-east-1_default.json"},{"service":"rds","region":"us-east-1","operation":"DescribeDatabases","iterated":"DBInstanceId=rm-0xig8l6102l11wmv4","resource_type":"Databases","count":1,"file":"rds_DescribeDatabases_us-east-1_default.json"},{"service":"rds","region":"us-east-1","operation":"DescribeDatabases","iterated":"DBInstanceId=rm-0xim5bttukvb2f191","resource_type":"Databases","count":2,"file":"rds_DescribeDatabases_us-east-1_default.json"},{"service":"slb","region":"ap-southeast-1","operation":"DescribeLoadBalancers","iterated":"","resource_type":"LoadBalancers","count":3,"file":"slb_DescribeLoadBalancers_ap-southeast-1_default.json"},{"service":"slb","region":"us-east-1","operation":"DescribeLoadBalancers","iterated":"","resource_type":"LoadBalancers","count":7,"file":"slb_DescribeLoadBalancers_us-east-1_default.json"},{"service":"vpc","region":"ap-southeast-1","operation":"DescribeEipAddresses","iterated":"","resource_type":"EipAddresses","count":20,"file":"vpc_DescribeEipAddresses_ap-southeast-1_default.json"},{"service":"vpc","region":"cn-beijing","operation":"DescribeEipAddresses","iterated":"","resource_type":"EipAddresses","count":1,"file":"vpc_DescribeEipAddresses_cn-beijing_default.json"},{"service":"vpc","region":"cn-hangzhou","operation":"DescribeEipAddresses","iterated":"","resource_type":"EipAddresses","count":1,"file":"vpc_DescribeEipAddresses_cn-hangzhou_default.json"},{"service":"vpc","region":"eu-central-1","operation":"DescribeEipAddresses","iterated":"","resource_type":"EipAddresses","count":7,"file":"vpc_DescribeEipAddresses_eu-central-1_default.json"},{"service":"vpc","region":"us-east-1","operation":"DescribeEipAddresses","iterated":"","resource_type":"EipAddresses","count":20,"file":"vpc_DescribeEipAddresses_us-east-1_default.json"},{"service":"vpc","region":"ap-northeast-1","operation":"DescribeVSwitches","iterated":"","resource_type":"VSwitches","count":2,"file":"vpc_DescribeVSwitches_ap-northeast-1_default.json"},{"service":"vpc","region":"ap-southeast-1","operation":"DescribeVSwitches","iterated":"","resource_type":"VSwitches","count":13,"file":"vpc_DescribeVSwitches_ap-southeast-1_default.json"},{"service":"vpc","region":"ap-southeast-3","operation":"DescribeVSwitches","iterated":"","resource_type":"VSwitches","count":1,"file":"vpc_DescribeVSwitches_ap-southeast-3_default.json"},{"service":"vpc","region":"ap-southeast-5","operation":"DescribeVSwitches","iterated":"","resource_type":"VSwitches","count":1,"file":"vpc_DescribeVSwitches_ap-southeast-5_default.json"},{"service":"vpc","region":"cn-beijing","operation":"DescribeVSwitches","iterated":"","resource_type":"VSwitches","count":2,"file":"vpc_DescribeVSwitches_cn-beijing_default.json"},{"service":"vpc","region":"cn-hangzhou","operation":"DescribeVSwitches","iterated":"","resource_type":"VSwitches","count":1,"file":"vpc_DescribeVSwitches_cn-hangzhou_default.json"},{"service":"vpc","region":"cn-hongkong","operation":"DescribeVSwitches","iterated":"","resource_type":"VSwitches","count":1,"file":"vpc_DescribeVSwitches_cn-hongkong_default.json"},{"service":"vpc","region":"eu-central-1","operation":"DescribeVSwitches","iterated":"","resource_type":"VSwitches","count":3,"file":"vpc_DescribeVSwitches_eu-central-1_default.json"},{"service":"vpc","region":"me-east-1","operation":"DescribeVSwitches","iterated":"","resource_type":"VSwitches","count":2,"file":"vpc_DescribeVSwitches_me-east-1_default.json"},{"service":"vpc","region":"us-east-1","operation":"DescribeVSwitches","iterated":"","resource_type":"VSwitches","count":7,"file":"vpc_DescribeVSwitches_us-east-1_default.json"},{"service":"vpc","region":"ap-northeast-1","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":2,"file":"vpc_DescribeVpcs_ap-northeast-1_default.json"},{"service":"vpc","region":"ap-southeast-1","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":8,"file":"vpc_DescribeVpcs_ap-southeast-1_default.json"},{"service":"vpc","region":"ap-southeast-3","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":1,"file":"vpc_DescribeVpcs_ap-southeast-3_default.json"},{"service":"vpc","region":"ap-southeast-5","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":1,"file":"vpc_DescribeVpcs_ap-southeast-5_default.json"},{"service":"vpc","region":"cn-beijing","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":1,"file":"vpc_DescribeVpcs_cn-beijing_default.json"},{"service":"vpc","region":"cn-hangzhou","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":1,"file":"vpc_DescribeVpcs_cn-hangzhou_default.json"},{"service":"vpc","region":"cn-hongkong","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":1,"file":"vpc_DescribeVpcs_cn-hongkong_default.json"},{"service":"vpc","region":"eu-central-1","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":2,"file":"vpc_DescribeVpcs_eu-central-1_default.json"},{"service":"vpc","region":"me-east-1","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":2,"file":"vpc_DescribeVpcs_me-east-1_default.json"},{"service":"vpc","region":"us-east-1","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":4,"file":"vpc_DescribeVpcs_us-east-1_default.json"}];
+    const summary = {"total_resources":39770,"services":{"actiontrail":2,"adb":363,"alb":72,"alidns":1931,"alikafka":17,"cdn":2,"cr":464,"domain":9,"ecs":36418,"oss":352,"rds":25,"slb":10,"vpc":105},"files":244,"entries":392};
+
+    const serviceFilter = document.getElementById('serviceFilter');
+    const regionFilter = document.getElementById('regionFilter');
+    const searchInput = document.getElementById('searchInput');
+    const detailBody = document.getElementById('detailBody');
+    const hierarchyEl = document.getElementById('hierarchy');
+    const serviceChart = document.getElementById('serviceChart');
+
+    function uniqueValues(key) {
+      const set = new Set(entries.map(e => e[key] || 'global'));
+      return Array.from(set).sort();
+    }
+
+    function buildSelect(select, values, label) {
+      select.innerHTML = '';
+      const optAll = document.createElement('option');
+      optAll.value = '';
+      optAll.textContent = 'All ' + label;
+      select.appendChild(optAll);
+      values.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+      });
+    }
+
+    function buildHierarchy(data) {
+      const tree = {};
+      data.forEach(item => {
+        const region = item.region || 'global';
+        const iter = item.iterated || 'all';
+        tree[item.service] = tree[item.service] || {};
+        tree[item.service][region] = tree[item.service][region] || {};
+        tree[item.service][region][item.operation] = tree[item.service][region][item.operation] || {};
+        tree[item.service][region][item.operation][iter] = tree[item.service][region][item.operation][iter] || {};
+        tree[item.service][region][item.operation][iter][item.resource_type] =
+          (tree[item.service][region][item.operation][iter][item.resource_type] || 0) + item.count;
+      });
+      return tree;
+    }
+
+    function createDetailRow(item) {
+      const tr = document.createElement('tr');
+      tr.dataset.service = item.service;
+      tr.dataset.region = item.region || 'global';
+      tr.dataset.operation = item.operation;
+      tr.dataset.iterated = item.iterated || '';
+      tr.dataset.type = item.resource_type;
+      tr.dataset.file = item.file;
+      tr.innerHTML = `
+        <td>${item.service}</td>
+        <td>${item.region || 'global'}</td>
+        <td>${item.operation}</td>
+        <td>${item.iterated || ''}</td>
+        <td>${item.resource_type}</td>
+        <td class="num">${item.count}</td>
+        <td>${item.file}</td>
+      `;
+      return tr;
+    }
+
+    function renderDetails(data) {
+      detailBody.innerHTML = '';
+      data.forEach(item => detailBody.appendChild(createDetailRow(item)));
+    }
+
+    function renderChart(data) {
+      const totals = {};
+      data.forEach(item => {
+        totals[item.service] = (totals[item.service] || 0) + item.count;
+      });
+      const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+      const max = sorted.length ? sorted[0][1] : 1;
+      serviceChart.innerHTML = '';
+      sorted.forEach(([service, count]) => {
+        const row = document.createElement('div');
+        row.className = 'bar';
+        row.innerHTML = `
+          <div>${service}</div>
+          <div class="track"><div class="fill" style="width:${(count / max) * 100}%"></div></div>
+          <div class="num">${count}</div>
+        `;
+        serviceChart.appendChild(row);
+      });
+    }
+
+    function renderHierarchy(data) {
+      const tree = buildHierarchy(data);
+      hierarchyEl.innerHTML = '';
+      Object.keys(tree).sort().forEach(service => {
+        const serviceNode = document.createElement('details');
+        serviceNode.open = true;
+        const serviceTotal = data.filter(d => d.service === service).reduce((a, b) => a + b.count, 0);
+        serviceNode.innerHTML = `<summary class="clickable" data-service="${service}">${service}<span class="pill">${serviceTotal}</span></summary>`;
+        const serviceStack = document.createElement('div');
+        serviceStack.className = 'stack';
+        Object.keys(tree[service]).sort().forEach(region => {
+          const regionNode = document.createElement('details');
+          regionNode.innerHTML = `<summary class="clickable" data-service="${service}" data-region="${region}">${region}</summary>`;
+          const regionStack = document.createElement('div');
+          regionStack.className = 'stack';
+          Object.keys(tree[service][region]).sort().forEach(operation => {
+            const opNode = document.createElement('details');
+            opNode.innerHTML = `<summary class="clickable" data-service="${service}" data-region="${region}" data-operation="${operation}">${operation}</summary>`;
+            const opStack = document.createElement('div');
+            opStack.className = 'stack';
+            const iterKeys = Object.keys(tree[service][region][operation]).sort();
+            if (iterKeys.length === 1 && iterKeys[0] === 'all') {
+              const grid = document.createElement('div');
+              grid.className = 'grid-2';
+              Object.keys(tree[service][region][operation].all).sort().forEach(type => {
+                const count = tree[service][region][operation].all[type];
+                const label = document.createElement('div');
+                label.className = 'node leaf clickable';
+                label.dataset.service = service;
+                label.dataset.region = region;
+                label.dataset.operation = operation;
+                label.dataset.type = type;
+                label.textContent = type;
+                const num = document.createElement('div');
+                num.className = 'num';
+                num.textContent = count;
+                grid.appendChild(label);
+                grid.appendChild(num);
+              });
+              opStack.appendChild(grid);
+            } else {
+              iterKeys.forEach(iter => {
+                const iterNode = document.createElement('details');
+                iterNode.innerHTML = `<summary class="clickable" data-service="${service}" data-region="${region}" data-operation="${operation}" data-iterated="${iter}">${iter}</summary>`;
+                const grid = document.createElement('div');
+                grid.className = 'grid-2';
+                Object.keys(tree[service][region][operation][iter]).sort().forEach(type => {
+                  const count = tree[service][region][operation][iter][type];
+                  const label = document.createElement('div');
+                  label.className = 'node leaf clickable';
+                  label.dataset.service = service;
+                  label.dataset.region = region;
+                  label.dataset.operation = operation;
+                  label.dataset.iterated = iter;
+                  label.dataset.type = type;
+                  label.textContent = type;
+                  const num = document.createElement('div');
+                  num.className = 'num';
+                  num.textContent = count;
+                  grid.appendChild(label);
+                  grid.appendChild(num);
+                });
+                iterNode.appendChild(grid);
+                opStack.appendChild(iterNode);
+              });
+            }
+            opNode.appendChild(opStack);
+            regionStack.appendChild(opNode);
+          });
+          regionNode.appendChild(regionStack);
+          serviceStack.appendChild(regionNode);
+        });
+        serviceNode.appendChild(serviceStack);
+        hierarchyEl.appendChild(serviceNode);
+      });
+    }
+
+    function filterData() {
+      const svc = serviceFilter.value;
+      const region = regionFilter.value;
+      const q = searchInput.value.toLowerCase().trim();
+      return entries.filter(e => {
+        const r = e.region || 'global';
+        if (svc && e.service !== svc) return false;
+        if (region && r !== region) return false;
+        if (q) {
+          const hay = `${e.service} ${r} ${e.operation} ${e.iterated || ''} ${e.resource_type} ${e.file}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+    }
+
+    function updateSummary(data) {
+      const totalResources = data.reduce((a, b) => a + b.count, 0);
+      const services = new Set(data.map(d => d.service)).size;
+      const files = new Set(data.map(d => d.file)).size;
+      document.getElementById('totalResources').textContent = totalResources;
+      document.getElementById('totalServices').textContent = services;
+      document.getElementById('totalFiles').textContent = files;
+      document.getElementById('totalEntries').textContent = data.length;
+      document.getElementById('filteredMeta').textContent = `${data.length} rows shown`;
+    }
+
+    function applyFilters() {
+      const data = filterData();
+      renderDetails(data);
+      renderChart(data);
+      renderHierarchy(data);
+      updateSummary(data);
+    }
+
+    function setFilters(dataset) {
+      if (dataset.service) serviceFilter.value = dataset.service;
+      if (dataset.region) regionFilter.value = dataset.region;
+      if (dataset.operation) searchInput.value = dataset.operation;
+      if (dataset.iterated) searchInput.value = dataset.iterated;
+      if (dataset.type) searchInput.value = dataset.type;
+      applyFilters();
+    }
+
+    buildSelect(serviceFilter, uniqueValues('service'), 'Services');
+    buildSelect(regionFilter, uniqueValues('region'), 'Regions');
+    renderDetails(entries);
+    renderChart(entries);
+    renderHierarchy(entries);
+    updateSummary(entries);
+
+    serviceFilter.addEventListener('change', applyFilters);
+    regionFilter.addEventListener('change', applyFilters);
+    searchInput.addEventListener('input', applyFilters);
+
+    document.getElementById('resetFilters').addEventListener('click', () => {
+      serviceFilter.value = '';
+      regionFilter.value = '';
+      searchInput.value = '';
+      applyFilters();
+    });
+    document.getElementById('expandAll').addEventListener('click', () => {
+      document.querySelectorAll('details').forEach(d => d.open = true);
+    });
+    document.getElementById('collapseAll').addEventListener('click', () => {
+      document.querySelectorAll('details').forEach(d => d.open = false);
+    });
+    hierarchyEl.addEventListener('click', (e) => {
+      const target = e.target.closest('.clickable');
+      if (!target || !hierarchyEl.contains(target)) return;
+      if (target.tagName.toLowerCase() === 'summary') {
+        setFilters(target.dataset);
+      } else if (target.classList.contains('leaf')) {
+        setFilters(target.dataset);
+      }
+    });
+  </script>
+</body>
+</html>

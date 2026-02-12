@@ -86,6 +86,7 @@ Build a report from saved listings::
 
   aws-list-all report --directory ./data/
   aws-list-all report --directory ./data/ --format json --output report.json
+  aws-list-all report --directory ./data/ --format html --output report.html
 
 List available services to query::
 
@@ -122,6 +123,7 @@ Build a report from saved listings::
 
   aliyun-list-all report --directory ./data/
   aliyun-list-all report --directory ./data/ --format json --output report.json
+  aliyun-list-all report --directory ./data/ --format html --output report.html
 
 Supported regions (fixed list):
 
@@ -145,10 +147,11 @@ Supported regions (fixed list):
 
 Notes:
 
-* The Aliyun support currently targets these services: ``ecs``, ``vpc``, ``slb``, ``rds``, ``ram``, ``nas``,
-  ``alb``, ``cdn``, ``oss``, ``actiontrail``, ``ebs``, ``eci``, ``ros``, ``drds``, ``domain``,
-  ``elasticsearch``, ``alidns``, ``kms``, ``polardb``, ``privatelink``, ``sts``, ``vpcpeer``,
-  ``dbs``, ``das``, ``dds``, ``alikafka``, ``mts``, ``cloud-siem``, ``arms``, ``adb``.
+* The Aliyun support currently targets these services: ``ecs``, ``vpc``, ``slb``, ``rds``, ``ram``,
+  ``resourcemanager``, ``quotas``, ``nas``, ``alb``, ``cdn``, ``oss``, ``actiontrail``, ``ebs``, ``eci``,
+  ``ess``, ``ros``, ``drds``, ``domain``, ``elasticsearch``, ``alidns``, ``kms``, ``polardb``,
+  ``privatelink``, ``sts``, ``vpcpeer``, ``dbs``, ``das``, ``dds``, ``alikafka``, ``mts``,
+  ``cloud-siem``, ``arms``, ``adb``.
 * Added ``cr`` (Container Registry) with list operations for instances, endpoints, repositories, sync rules/tasks,
   triggers, and chart namespaces.
 * ``ocr`` is registered but has no listing operations (image input required); it will be skipped.
