@@ -21,6 +21,7 @@ from .introspection import get_regions_for_service
 from .listing import AliyunListing
 from .operations import get_operations, get_service_spec
 from .oss_client import get_oss_service_client
+from .service_names import ALIYUN_SERVICE_NAMES
 
 RESULT_NOTHING = '---'
 RESULT_SOMETHING = '+++'
@@ -84,6 +85,25 @@ def _extract_items(response, result_path):
         if isinstance(current, dict) and part in current:
             current = current[part]
         else:
+            # If the configured result_path is not present, fall back to trying to
+            # discover a reasonable list in the response payload. This allows
+            # placeholder operations (with unknown result paths) to still yield
+            # results by auto-detecting the first list-like structure.
+            def _find_first_list(obj):
+                if isinstance(obj, list):
+                    return obj
+                if isinstance(obj, dict):
+                    for k, v in obj.items():
+                        if isinstance(v, list) and v:
+                            return v
+                    for v in obj.values():
+                        found = _find_first_list(v)
+                        if found:
+                            return found
+                return []
+
+            if not result_path:
+                return _find_first_list(response)
             return []
     if current is None:
         return []
@@ -196,7 +216,8 @@ def do_query(services, selected_regions=(), selected_operations=(), verbose=0, p
                     continue
                 region_label = region if spec.regional else 'global'
                 if verbose > 0:
-                    print('Service: {: <10} | Region: {:<12} | Operation: {}'.format(service, region_label, operation.name))
+                    svc_label = ALIYUN_SERVICE_NAMES.get(service, service)
+                    print('Service: {: <10} ({}) | Region: {:<12} | Operation: {}'.format(service, svc_label, region_label, operation.name))
                 if operation.iterate_from:
                     iterated_ops.append([service, region, operation, profile, spec, region_label])
                 else:
@@ -383,7 +404,7 @@ def do_list_files(filenames, verbose=0):
         listing = AliyunListing.from_json(json.load(open(listing_filename, 'rb')))
         resources = listing.resources
         for resource_type, value in resources.items():
-            print(listing.service, listing.region, listing.operation, resource_type, str(len(value)))
+            print(listing.service, ALIYUN_SERVICE_NAMES.get(listing.service, ''), listing.region, listing.operation, resource_type, str(len(value)))
             if verbose > 0:
                 for item in value:
                     if isinstance(item, dict):

@@ -7,6 +7,7 @@ from .introspection import get_regions_for_service
 from .operations import get_operations, get_services
 from .report import write_report
 from .query import do_list_files, do_query
+from .service_names import ALIYUN_SERVICE_NAMES
 
 
 def main():
@@ -80,15 +81,15 @@ def main():
     elif args.command == 'introspect':
         if args.introspect == 'list-services':
             for service in get_services():
-                print(service)
+                print(service, ALIYUN_SERVICE_NAMES.get(service, ''))
         elif args.introspect == 'list-operations':
             for service in args.service or get_services():
                 for operation in get_operations(service):
-                    print(service, operation.name)
+                    print(service, ALIYUN_SERVICE_NAMES.get(service, ''), operation.name)
         elif args.introspect == 'list-service-regions':
             for service in args.service or get_services():
                 for region in get_regions_for_service(service):
-                    print(service, region)
+                    print(service, ALIYUN_SERVICE_NAMES.get(service, ''), region)
         else:
             introspect.print_help()
             return 1

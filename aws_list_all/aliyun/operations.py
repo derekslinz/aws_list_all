@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional, Dict, Any
 
 
 @dataclass(frozen=True)
@@ -9,17 +10,17 @@ class AliyunOperation:
     resource_type: str
     result_path: tuple
     method: str = "POST"
-    parameters: dict = None
+    parameters: Optional[Dict[str, Any]] = None
     pagination: str = "page"  # page, marker, token, none
     page_size: int = 50
     token_param: str = "NextToken"
     limit_param: str = "MaxResults"
     page_number_param: str = "PageNumber"
     page_size_param: str = "PageSize"
-    iterate_from: str = None
-    iterate_param: str = None
-    iterate_field: str = None
-    iterate_params: dict = None
+    iterate_from: Optional[str] = None
+    iterate_param: Optional[str] = None
+    iterate_field: Optional[str] = None
+    iterate_params: Optional[Dict[str, Any]] = None
 
 
 @dataclass(frozen=True)
@@ -29,6 +30,7 @@ class AliyunServiceSpec:
 
 
 SERVICE_SPECS = {
+    # Core services for discovery
     "ecs": AliyunServiceSpec(endpoint_template="ecs.{region}.aliyuncs.com"),
     "vpc": AliyunServiceSpec(endpoint_template="vpc.{region}.aliyuncs.com"),
     "slb": AliyunServiceSpec(endpoint_template="slb.{region}.aliyuncs.com"),
@@ -40,6 +42,16 @@ SERVICE_SPECS = {
     "oss": AliyunServiceSpec(endpoint_template="oss-{region}.aliyuncs.com"),
     "alb": AliyunServiceSpec(endpoint_template="alb.{region}.aliyuncs.com"),
     "cdn": AliyunServiceSpec(endpoint_template="cdn.aliyuncs.com", regional=False),
+    "dcdn": AliyunServiceSpec(endpoint_template="dcdn.aliyuncs.com", regional=False),
+    "scdn": AliyunServiceSpec(endpoint_template="scdn.aliyuncs.com", regional=False),
+    "esa": AliyunServiceSpec(endpoint_template="esa.cn-hangzhou.aliyuncs.com", regional=False),
+    "ens": AliyunServiceSpec(endpoint_template="ens.aliyuncs.com", regional=False),
+    "eais": AliyunServiceSpec(endpoint_template="eais.{region}.aliyuncs.com"),
+    "ehpc": AliyunServiceSpec(endpoint_template="ehpc.{region}.aliyuncs.com", regional=False),
+    "ehpcinstant": AliyunServiceSpec(endpoint_template="ehpcinstant.{region}.aliyuncs.com", regional=False),
+    "eflo": AliyunServiceSpec(endpoint_template="eflo.{region}.aliyuncs.com"),
+    "eflo-controller": AliyunServiceSpec(endpoint_template="eflo-controller.{region}.aliyuncs.com", regional=False),
+    "eflo-cnp": AliyunServiceSpec(endpoint_template="eflo-cnp.cn-wulanchabu.aliyuncs.com", regional=False),
     "actiontrail": AliyunServiceSpec(endpoint_template="actiontrail.{region}.aliyuncs.com"),
     "ebs": AliyunServiceSpec(endpoint_template="ebs.{region}.aliyuncs.com"),
     "eci": AliyunServiceSpec(endpoint_template="eci.{region}.aliyuncs.com"),
@@ -65,7 +77,66 @@ SERVICE_SPECS = {
     "adb": AliyunServiceSpec(endpoint_template="adb.{region}.aliyuncs.com"),
     "cr": AliyunServiceSpec(endpoint_template="cr.{region}.aliyuncs.com"),
     "dms-enterprise": AliyunServiceSpec(endpoint_template="dms-enterprise.{region}.aliyuncs.com"),
+    # Additional key services for discovery
+    "nlb": AliyunServiceSpec(endpoint_template="nlb.{region}.aliyuncs.com"),
+    "sls": AliyunServiceSpec(endpoint_template="sls.aliyuncs.com", regional=False),
+    "searchengine": AliyunServiceSpec(endpoint_template="searchengine.{region}.aliyuncs.com"),
+    "sgw": AliyunServiceSpec(endpoint_template="sgw.{region}.aliyuncs.com"),
+    "smc": AliyunServiceSpec(endpoint_template="smc.aliyuncs.com", regional=False),
+    "tag": AliyunServiceSpec(endpoint_template="tag.aliyuncs.com", regional=False),
+    "ververica": AliyunServiceSpec(endpoint_template="ververica.{region}.aliyuncs.com"),
+    "vod": AliyunServiceSpec(endpoint_template="vod.{region}.aliyuncs.com"),
+    "mse": AliyunServiceSpec(endpoint_template="mse.{region}.aliyuncs.com"),
+    "cloudfw": AliyunServiceSpec(endpoint_template="cloudfw.aliyuncs.com", regional=False),
+    "eventbridge": AliyunServiceSpec(endpoint_template="eventbridge.{region}.aliyuncs.com"),
+    "fc": AliyunServiceSpec(endpoint_template="fc.aliyuncs.com", regional=False),
+    "rocketmq": AliyunServiceSpec(endpoint_template="rocketmq.{region}.aliyuncs.com"),
+    "emr": AliyunServiceSpec(endpoint_template="emr.{region}.aliyuncs.com"),
+    "cloudapi": AliyunServiceSpec(endpoint_template="cloudapi.aliyuncs.com", regional=False),
+    "ossadmin": AliyunServiceSpec(endpoint_template="ossadmin.aliyuncs.com", regional=False),
+    "cs": AliyunServiceSpec(endpoint_template="cs.{region}.aliyuncs.com"),
+    "r-kvstore": AliyunServiceSpec(endpoint_template="r-kvstore.{region}.aliyuncs.com"),
+    "ddoscoo": AliyunServiceSpec(endpoint_template="ddoscoo.{region}.aliyuncs.com"),
+    "ddosbgp": AliyunServiceSpec(endpoint_template="ddosbgp.{region}.aliyuncs.com"),
+    "waf-openapi": AliyunServiceSpec(endpoint_template="wafopenapi.cn-hangzhou.aliyuncs.com", regional=False),
+    "hbr": AliyunServiceSpec(endpoint_template="hbr.{region}.aliyuncs.com"),
+    "sddp": AliyunServiceSpec(endpoint_template="sddp.{region}.aliyuncs.com"),
+    # Security-related services
+    "sas": AliyunServiceSpec(endpoint_template="sas.aliyuncs.com", regional=False),
+    "saf": AliyunServiceSpec(endpoint_template="saf.aliyuncs.com", regional=False),
+    "sophonsoar": AliyunServiceSpec(endpoint_template="sophonsoar.aliyuncs.com", regional=False),
+    "yundun-bastionhost": AliyunServiceSpec(endpoint_template="bastionhost.{region}.aliyuncs.com"),
+    "csas": AliyunServiceSpec(endpoint_template="csas.aliyuncs.com", regional=False),
+    # Database family services
+    "gpdb": AliyunServiceSpec(endpoint_template="gpdb.{region}.aliyuncs.com"),
+    "clickhouse": AliyunServiceSpec(endpoint_template="clickhouse.{region}.aliyuncs.com"),
+    "oceanbasepro": AliyunServiceSpec(endpoint_template="oceanbasepro.{region}.aliyuncs.com"),
+    "hbase": AliyunServiceSpec(endpoint_template="hbase.{region}.aliyuncs.com"),
+    "polardbx": AliyunServiceSpec(endpoint_template="polardbx.{region}.aliyuncs.com"),
+    "starrocks": AliyunServiceSpec(endpoint_template="starrocks.{region}.aliyuncs.com"),
+    "hitsdb": AliyunServiceSpec(endpoint_template="hitsdb.{region}.aliyuncs.com"),
+    "hologram": AliyunServiceSpec(endpoint_template="hologram.{region}.aliyuncs.com"),
 }
+
+# Add missing networking and container service endpoint specs
+SERVICE_SPECS.update({
+    "cbn": AliyunServiceSpec(endpoint_template="cbn.{region}.aliyuncs.com"),
+    "vpcipam": AliyunServiceSpec(endpoint_template="vpcipam.{region}.aliyuncs.com"),
+    "ga": AliyunServiceSpec(endpoint_template="ga.aliyuncs.com", regional=False),
+    "eipanycast": AliyunServiceSpec(endpoint_template="eipanycast.{region}.aliyuncs.com"),
+    "gwlb": AliyunServiceSpec(endpoint_template="gwlb.{region}.aliyuncs.com"),
+    "expressconnectrouter": AliyunServiceSpec(endpoint_template="expressconnectrouter.{region}.aliyuncs.com"),
+    # Container / cloud-native platform
+    "apig": AliyunServiceSpec(endpoint_template="apig.{region}.aliyuncs.com"),
+    "eci": AliyunServiceSpec(endpoint_template="eci.{region}.aliyuncs.com"),
+    "cr": AliyunServiceSpec(endpoint_template="cr.{region}.aliyuncs.com"),
+    "cs": AliyunServiceSpec(endpoint_template="cs.{region}.aliyuncs.com"),
+    "servicemesh": AliyunServiceSpec(endpoint_template="servicemesh.aliyuncs.com", regional=False),
+    "mse": AliyunServiceSpec(endpoint_template="mse.{region}.aliyuncs.com"),
+    "edas": AliyunServiceSpec(endpoint_template="edas.{region}.aliyuncs.com"),
+    "sae": AliyunServiceSpec(endpoint_template="sae.{region}.aliyuncs.com"),
+    "adcp": AliyunServiceSpec(endpoint_template="adcp.{region}.aliyuncs.com"),
+})
 
 
 ALIYUN_OPERATIONS = {
@@ -207,6 +278,114 @@ ALIYUN_OPERATIONS = {
             pagination="none",
             iterate_from="DescribeNetworkInterfaces",
             iterate_params={"NetworkInterfaceId": "NetworkInterfaceId"},
+        ),
+    ],
+    "resourcecenter": [
+        AliyunOperation(
+            name="SearchResources",
+            action="SearchResources",
+            version="2022-12-01",
+            resource_type="Resources",
+            result_path=("Resources",),
+            pagination="token",
+            page_size=100,
+        ),
+    ],
+    "resourcedirectorymaster": [
+        AliyunOperation(
+            name="ListAccounts",
+            action="ListAccounts",
+            version="2022-04-19",
+            resource_type="Accounts",
+            result_path=("Accounts",),
+            pagination="token",
+            page_size=100,
+        ),
+    ],
+    "resourcesharing": [
+        AliyunOperation(
+            name="ListSharedResources",
+            action="ListSharedResources",
+            version="2020-01-10",
+            resource_type="SharedResources",
+            result_path=("SharedResources",),
+            pagination="token",
+            parameters={"ResourceOwner": "Self"},
+            page_size=100,
+        ),
+    ],
+    "ims": [
+        AliyunOperation(
+            name="ListUsers",
+            action="ListUsers",
+            version="2019-08-15",
+            resource_type="Users",
+            result_path=("Users",),
+            pagination="marker",
+            page_size=100,
+        ),
+    ],
+    "bssopenapi": [
+        AliyunOperation(
+            name="QueryAccountBalance",
+            action="QueryAccountBalance",
+            version="2017-12-14",
+            resource_type="AccountBalance",
+            result_path=("Data",),
+            pagination="none",
+            page_size=50,
+        ),
+    ],
+    "config": [
+        AliyunOperation(
+            name="GetDiscoveredResourceCounts",
+            action="GetDiscoveredResourceCounts",
+            version="2020-09-07",
+            resource_type="DiscoveredResourceCounts",
+            result_path=("DiscoveredResourceCounts",),
+            pagination="none",
+        ),
+    ],
+    "cloudsso": [
+        AliyunOperation(
+            name="ListDirectories",
+            action="ListDirectories",
+            version="2021-05-15",
+            resource_type="Directories",
+            result_path=("Directories",),
+            pagination="token",
+            page_size=100,
+        ),
+    ],
+    "cloudauth": [
+        AliyunOperation(
+            name="DescribeListAntCloudAuthScenes",
+            action="DescribeListAntCloudAuthScenes",
+            version="2019-03-07",
+            resource_type="AntCloudAuthScenes",
+            result_path=("Data", "AntCloudAuthSceneVOList"),
+            pagination="none",
+            page_size=50,
+        ),
+    ],
+    "cloudapi": [
+        AliyunOperation(
+            name="DescribeApis",
+            action="DescribeApis",
+            version="2016-07-14",
+            resource_type="Apis",
+            result_path=("Apis", "Api"),
+            page_size=100,
+        ),
+    ],
+    "cloudfw": [
+        AliyunOperation(
+            name="ListFirewallPolicies",
+            action="ListFirewallPolicies",
+            version="2018-04-15",
+            resource_type="FirewallPolicies",
+            result_path=("FirewallPolicies", "FirewallPolicy"),
+            page_size=100,
         ),
     ],
     "vpc": [
@@ -468,6 +647,67 @@ ALIYUN_OPERATIONS = {
             iterate_params={"DBInstanceId": "DBInstanceId"},
         ),
     ],
+    # Networking - added placeholder operations
+    "cbn": [
+        AliyunOperation(
+            name="ListTransitRouters",
+            action="ListTransitRouters",
+            version="2017-09-12",
+            resource_type="TransitRouters",
+            result_path=("TransitRouters", "TransitRouter"),
+            page_size=50,
+        ),
+    ],
+    "vpcipam": [
+        AliyunOperation(
+            name="ListIpamPools",
+            action="ListIpamPools",
+            version="2021-01-01",
+            resource_type="IpamPools",
+            result_path=("IpamPools", "IpamPool"),
+            page_size=50,
+        ),
+    ],
+    "ga": [
+        AliyunOperation(
+            name="ListAccelerators",
+            action="ListAccelerators",
+            version="2019-11-20",
+            resource_type="Accelerators",
+            result_path=("Accelerators", "Accelerator"),
+            page_size=50,
+        ),
+    ],
+    "eipanycast": [
+        AliyunOperation(
+            name="ListAnycastEipAddresses",
+            action="ListAnycastEipAddresses",
+            version="2019-01-01",
+            resource_type="AnycastEips",
+            result_path=("AnycastEipAddresses", "AnycastEipAddress"),
+            page_size=50,
+        ),
+    ],
+    "gwlb": [
+        AliyunOperation(
+            name="ListGatewayLoadBalancers",
+            action="ListGatewayLoadBalancers",
+            version="2020-01-01",
+            resource_type="GatewayLoadBalancers",
+            result_path=("GatewayLoadBalancers", "GatewayLoadBalancer"),
+            page_size=50,
+        ),
+    ],
+    "expressconnectrouter": [
+        AliyunOperation(
+            name="ListExpressConnectRouters",
+            action="ListExpressConnectRouters",
+            version="2018-04-01",
+            resource_type="ExpressConnectRouters",
+            result_path=("ExpressConnectRouters", "ExpressConnectRouter"),
+            page_size=50,
+        ),
+    ],
     "alb": [
         AliyunOperation(
             name="ListLoadBalancers",
@@ -616,6 +856,16 @@ ALIYUN_OPERATIONS = {
             iterate_params={"ResourceId.1": "LoadBalancerId", "ResourceType": "LoadBalancer"},
         ),
     ],
+    "nlb": [
+        AliyunOperation(
+            name="DescribeLoadBalancers",
+            action="DescribeLoadBalancers",
+            version="2018-03-01",
+            resource_type="LoadBalancers",
+            result_path=("LoadBalancers", "LoadBalancer"),
+            page_size=50,
+        ),
+    ],
     "cdn": [
         AliyunOperation(
             name="DescribeUserDomains",
@@ -623,6 +873,247 @@ ALIYUN_OPERATIONS = {
             version="2018-05-10",
             resource_type="Domains",
             result_path=("Domains", "PageData"),
+            page_size=50,
+        ),
+    ],
+    "dcdn": [
+        AliyunOperation(
+            name="DescribeDcdnUserDomains",
+            action="DescribeDcdnUserDomains",
+            version="2018-01-15",
+            resource_type="Domains",
+            result_path=("Domains", "PageData"),
+            page_size=50,
+        ),
+    ],
+    "scdn": [
+        AliyunOperation(
+            name="DescribeScdnUserDomains",
+            action="DescribeScdnUserDomains",
+            version="2017-11-15",
+            resource_type="Domains",
+            result_path=("Domains", "PageData"),
+            page_size=50,
+        ),
+    ],
+    "esa": [
+        AliyunOperation(
+            name="ListSites",
+            action="ListSites",
+            version="2024-09-10",
+            resource_type="Sites",
+            result_path=("Sites",),
+            page_size=50,
+        ),
+    ],
+    "ens": [
+        AliyunOperation(
+            name="DescribeInstances",
+            action="DescribeInstances",
+            version="2017-11-10",
+            resource_type="Instances",
+            result_path=("Instances", "Instance"),
+            page_size=50,
+        ),
+    ],
+    "eais": [
+        AliyunOperation(
+            name="DescribeEais",
+            action="DescribeEais",
+            version="2019-06-24",
+            resource_type="Eais",
+            result_path=("Instances", "Instance"),
+            page_size=50,
+        ),
+    ],
+    "ehpc": [
+        AliyunOperation(
+            name="ListClusters",
+            action="ListClusters",
+            version="2024-07-30",
+            resource_type="Clusters",
+            result_path=("Clusters",),
+            page_size=50,
+        ),
+    ],
+    "ehpcinstant": [
+        AliyunOperation(
+            name="ListPools",
+            action="ListPools",
+            version="2023-07-01",
+            resource_type="Pools",
+            result_path=("PoolList",),
+            page_size=50,
+        ),
+    ],
+    "eflo": [
+        AliyunOperation(
+            name="ListVpds",
+            action="ListVpds",
+            version="2022-05-30",
+            resource_type="Vpds",
+            result_path=("Content", "Data"),
+            page_size=50,
+        ),
+    ],
+    "eflo-controller": [
+        AliyunOperation(
+            name="ListClusters",
+            action="ListClusters",
+            version="2022-12-15",
+            resource_type="Clusters",
+            result_path=("Clusters",),
+            pagination="token",
+            token_param="NextToken",
+            limit_param="MaxResults",
+            page_size=50,
+        ),
+    ],
+    "eflo-cnp": [
+        AliyunOperation(
+            name="ListWorkloads",
+            action="ListWorkloads",
+            version="2023-08-28",
+            resource_type="Workloads",
+            result_path=("Data",),
+            pagination="none",
+        ),
+    ],
+    "sddp": [
+        AliyunOperation(
+            name="DescribeInstances",
+            action="DescribeInstances",
+            version="2019-01-03",
+            resource_type="Instances",
+            result_path=("Items",),
+            page_size=100,
+            page_number_param="CurrentPage",
+        ),
+    ],
+    "searchengine": [
+        AliyunOperation(
+            name="ListInstances",
+            action="ListInstances",
+            version="2021-10-25",
+            resource_type="Instances",
+            result_path=("result",),
+            page_size=100,
+            page_number_param="pageNumber",
+            page_size_param="pageSize",
+        ),
+    ],
+    "servicemesh": [
+        AliyunOperation(
+            name="DescribeServiceMeshes",
+            action="DescribeServiceMeshes",
+            version="2020-01-11",
+            resource_type="ServiceMeshes",
+            result_path=("ServiceMeshes",),
+            pagination="none",
+        ),
+    ],
+    "sgw": [
+        AliyunOperation(
+            name="DescribeGateways",
+            action="DescribeGateways",
+            version="2018-05-11",
+            resource_type="Gateways",
+            result_path=("Gateways", "Gateway"),
+            page_size=50,
+        ),
+    ],
+    "sls": [
+        AliyunOperation(
+            name="ListProject",
+            action="ListProject",
+            version="2020-12-30",
+            resource_type="Projects",
+            result_path=("projects",),
+            pagination="none",
+            parameters={"size": 100},
+        ),
+    ],
+    "smc": [
+        AliyunOperation(
+            name="DescribeSourceServers",
+            action="DescribeSourceServers",
+            version="2019-06-01",
+            resource_type="SourceServers",
+            result_path=("SourceServers", "SourceServer"),
+            page_size=50,
+        ),
+    ],
+    "sophonsoar": [
+        AliyunOperation(
+            name="DescribePlaybooks",
+            action="DescribePlaybooks",
+            version="2022-07-28",
+            resource_type="Playbooks",
+            result_path=("Playbooks",),
+            page_size=100,
+        ),
+    ],
+    "starrocks": [
+        AliyunOperation(
+            name="DescribeInstances",
+            action="DescribeInstances",
+            version="2022-10-19",
+            resource_type="Instances",
+            result_path=("Data",),
+            page_size=100,
+        ),
+    ],
+    "tag": [
+        AliyunOperation(
+            name="ListSupportResourceTypes",
+            action="ListSupportResourceTypes",
+            version="2018-08-28",
+            resource_type="SupportResourceTypes",
+            result_path=("SupportResourceTypes",),
+            pagination="token",
+            page_size=100,
+            limit_param="MaxResult",
+        ),
+    ],
+    "ververica": [
+        AliyunOperation(
+            name="ListDeployments",
+            action="ListDeployments",
+            version="2022-07-18",
+            resource_type="Deployments",
+            result_path=("data",),
+            pagination="none",
+            parameters={"workspace": "default", "namespace": "default", "pageSize": 100, "pageIndex": 1},
+        ),
+    ],
+    "vod": [
+        AliyunOperation(
+            name="GetVideoList",
+            action="GetVideoList",
+            version="2017-03-21",
+            resource_type="Videos",
+            result_path=("VideoList", "Video"),
+            page_size=100,
+            page_number_param="PageNo",
+        ),
+    ],
+    "waf-openapi": [
+        AliyunOperation(
+            name="DescribeInstanceInfo",
+            action="DescribeInstanceInfo",
+            version="2019-09-10",
+            resource_type="InstanceInfo",
+            result_path=("InstanceInfo",),
+            pagination="none",
+        ),
+    ],
+    "yundun-bastionhost": [
+        AliyunOperation(
+            name="DescribeInstances",
+            action="DescribeInstances",
+            version="2019-12-09",
+            resource_type="Instances",
+            result_path=("Instances",),
             page_size=50,
         ),
     ],
@@ -1178,7 +1669,16 @@ ALIYUN_OPERATIONS = {
             page_size=100,
         ),
     ],
-    "ocr": [],
+    "ocr": [
+        AliyunOperation(
+            name="GetAsyncJobResult",
+            action="GetAsyncJobResult",
+            version="2021-07-07",
+            resource_type="AsyncJobResult",
+            result_path=("Data",),
+            pagination="none",
+        ),
+    ],
     "polardb": [
         AliyunOperation(
             name="DescribeDBClusters",
@@ -1733,14 +2233,6 @@ ALIYUN_OPERATIONS = {
             iterate_params={"DBClusterId": "DBClusterId", "TableName": "TableName"},
         ),
         AliyunOperation(
-            name="DescribeRegions",
-            action="DescribeRegions",
-            version="2019-03-15",
-            resource_type="Regions",
-            result_path=("Regions", "Region"),
-            page_size=50,
-        ),
-        AliyunOperation(
             name="DescribeVpcs",
             action="DescribeVpcs",
             version="2019-03-15",
@@ -1840,6 +2332,28 @@ ALIYUN_OPERATIONS = {
             page_number_param="PageNo",
             iterate_from="ListInstance",
             iterate_params={"InstanceId": "InstanceId"},
+        ),
+    ],
+    "cs": [
+        AliyunOperation(
+            name="DescribeClustersV1",
+            action="DescribeClustersV1",
+            version="2015-12-15",
+            resource_type="Clusters",
+            result_path=("clusters",),
+            page_size=50,
+            page_number_param="page_number",
+            page_size_param="page_size",
+        ),
+        AliyunOperation(
+            name="DescribeClustersForRegion",
+            action="DescribeClustersForRegion",
+            version="2015-12-15",
+            resource_type="Clusters",
+            result_path=("clusters",),
+            page_size=50,
+            page_number_param="page_number",
+            page_size_param="page_size",
         ),
     ],
     "dms-enterprise": [
@@ -2447,14 +2961,6 @@ ALIYUN_OPERATIONS = {
     ],
     "ess": [
         AliyunOperation(
-            name="DescribeRegions",
-            action="DescribeRegions",
-            version="2014-08-28",
-            resource_type="Regions",
-            result_path=("Regions",),
-            pagination="none",
-        ),
-        AliyunOperation(
             name="DescribeLimitation",
             action="DescribeLimitation",
             version="2014-08-28",
@@ -2590,10 +3096,101 @@ ALIYUN_OPERATIONS = {
             action="DescribeElasticStrength",
             version="2014-08-28",
             resource_type="ElasticStrength",
-            result_path=(),
+            result_path=("ResourcePools",),
             pagination="none",
             iterate_from="DescribeScalingGroups",
             iterate_params={"ScalingGroupId": "ScalingGroupId"},
+        ),
+    ],
+    "ddoscoo": [
+        AliyunOperation(
+            name="DescribeInstances",
+            action="DescribeInstances",
+            version="2020-01-01",
+            resource_type="Instances",
+            result_path=("Instances",),
+            page_size=50,
+        ),
+    ],
+    "ddosbgp": [
+        AliyunOperation(
+            name="DescribeInstances",
+            action="DescribeInstances",
+            version="2018-07-09",
+            resource_type="Instances",
+            result_path=("Instances",),
+            page_size=50,
+        ),
+    ],
+    "emr": [
+        AliyunOperation(
+            name="ListClusters",
+            action="ListClusters",
+            version="2016-04-08",
+            resource_type="Clusters",
+            result_path=("Clusters",),
+            page_size=50,
+            page_number_param="PageNumber",
+        ),
+    ],
+    "eventbridge": [
+        AliyunOperation(
+            name="ListEventBuses",
+            action="ListEventBuses",
+            version="2020-07-01",
+            resource_type="EventBuses",
+            result_path=("EventBuses",),
+            page_size=50,
+        ),
+    ],
+    "fc": [
+        AliyunOperation(
+            name="ListFunctions",
+            action="ListFunctions",
+            version="2021-04-06",
+            resource_type="Functions",
+            result_path=("Functions",),
+            page_size=50,
+        ),
+    ],
+    "hbr": [
+        AliyunOperation(
+            name="DescribeBackupVaults",
+            action="DescribeBackupVaults",
+            version="2021-01-15",
+            resource_type="BackupVaults",
+            result_path=("BackupVaults",),
+            page_size=50,
+        ),
+    ],
+    "mse": [
+        AliyunOperation(
+            name="ListClusters",
+            action="ListClusters",
+            version="2019-05-31",
+            resource_type="Clusters",
+            result_path=("Clusters",),
+            page_size=50,
+        ),
+    ],
+    "ossadmin": [
+        AliyunOperation(
+            name="ListBuckets",
+            action="ListBuckets",
+            version="2019-05-17",
+            resource_type="Buckets",
+            result_path=("Buckets",),
+            pagination="none",
+        ),
+    ],
+    "rocketmq": [
+        AliyunOperation(
+            name="ListInstances",
+            action="ListInstances",
+            version="2022-08-01",
+            resource_type="Instances",
+            result_path=("Instances",),
+            page_size=50,
         ),
     ],
     "ros": [
@@ -2713,6 +3310,156 @@ ALIYUN_OPERATIONS = {
             version="2019-09-10",
             resource_type="ResourceTypeRegistrations",
             result_path=("ResourceTypeRegistrations", "ResourceTypeRegistration"),
+            page_size=50,
+        ),
+    ],
+    "r-kvstore": [
+        AliyunOperation(
+            name="DescribeInstances",
+            action="DescribeInstances",
+            version="2015-01-01",
+            resource_type="Instances",
+            result_path=("Instances", "KVStoreInstance"),
+            page_size=50,
+        ),
+    ],
+    "clickhouse": [
+        AliyunOperation(
+            name="DescribeDBClusters",
+            action="DescribeDBClusters",
+            version="2023-04-20",
+            resource_type="DBClusters",
+            result_path=("",),
+            page_size=50,
+        ),
+    ],
+    "gpdb": [
+        AliyunOperation(
+            name="DescribeDBInstances",
+            action="DescribeDBInstances",
+            version="2016-05-04",
+            resource_type="DBInstances",
+            result_path=("",),
+            page_size=50,
+        ),
+    ],
+    "hbase": [
+        AliyunOperation(
+            name="DescribeInstances",
+            action="DescribeInstances",
+            version="2019-01-01",
+            resource_type="Instances",
+            result_path=("",),
+            page_size=50,
+        ),
+    ],
+    "hitsdb": [
+        AliyunOperation(
+            name="DescribeInstances",
+            action="DescribeInstances",
+            version="2017-06-01",
+            resource_type="Instances",
+            result_path=("",),
+            page_size=50,
+        ),
+    ],
+    "hologram": [
+        AliyunOperation(
+            name="DescribeInstances",
+            action="DescribeInstances",
+            version="2022-06-15",
+            resource_type="Instances",
+            result_path=("",),
+            page_size=50,
+        ),
+    ],
+    "oceanbasepro": [
+        AliyunOperation(
+            name="DescribeInstances",
+            action="DescribeInstances",
+            version="2019-09-01",
+            resource_type="Instances",
+            result_path=("",),
+            page_size=50,
+        ),
+    ],
+    "polardbx": [
+        AliyunOperation(
+            name="DescribeDBInstances",
+            action="DescribeDBInstances",
+            version="2020-02-02",
+            resource_type="DBInstances",
+            result_path=("",),
+            page_size=50,
+        ),
+    ],
+    "sas": [
+        AliyunOperation(
+            name="DescribeInstances",
+            action="DescribeInstances",
+            version="2018-12-03",
+            resource_type="Instances",
+            result_path=("",),
+            page_size=50,
+        ),
+    ],
+    "saf": [
+        AliyunOperation(
+            name="QueryServiceStatus",
+            action="QueryServiceStatus",
+            version="2018-01-29",
+            resource_type="ServiceStatus",
+            result_path=("",),
+            pagination="none",
+        ),
+    ],
+    "csas": [
+        AliyunOperation(
+            name="ListUsers",
+            action="ListUsers",
+            version="2023-12-01",
+            resource_type="Users",
+            result_path=("",),
+            page_size=50,
+        ),
+    ],
+    "apig": [
+        AliyunOperation(
+            name="ListApplications",
+            action="ListApplications",
+            version="2023-09-15",
+            resource_type="Applications",
+            result_path=("",),
+            page_size=50,
+        ),
+    ],
+    "adcp": [
+        AliyunOperation(
+            name="ListClusters",
+            action="ListClusters",
+            version="2022-01-01",
+            resource_type="Clusters",
+            result_path=("",),
+            page_size=50,
+        ),
+    ],
+    "edas": [
+        AliyunOperation(
+            name="ListApplications",
+            action="ListApplications",
+            version="2017-08-01",
+            resource_type="Applications",
+            result_path=("",),
+            page_size=50,
+        ),
+    ],
+    "sae": [
+        AliyunOperation(
+            name="ListApplications",
+            action="ListApplications",
+            version="2019-05-06",
+            resource_type="Applications",
+            result_path=("",),
             page_size=50,
         ),
     ],

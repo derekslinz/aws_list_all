@@ -4,6 +4,7 @@ from datetime import datetime
 from string import Template
 
 from .listing import AliyunListing
+from .service_names import ALIYUN_SERVICE_NAMES
 
 try:
     from aws_list_all.listing import Listing as AwsListing
@@ -43,37 +44,40 @@ def build_report(directory):
                 for label, count in iteration_counts.items():
                     for resource_type in resources.keys():
                         entries.append({
-                            'service': listing.service,
-                            'region': listing.region,
-                            'operation': listing.operation,
-                            'iterated': label,
-                            'resource_type': resource_type,
-                            'count': count,
-                            'file': os.path.basename(path),
+                          'service': listing.service,
+                          'service_label': ALIYUN_SERVICE_NAMES.get(listing.service, listing.service),
+                          'region': listing.region,
+                          'operation': listing.operation,
+                          'iterated': label,
+                          'resource_type': resource_type,
+                          'count': count,
+                          'file': os.path.basename(path),
                         })
             else:
-                for resource_type, items in resources.items():
-                    entries.append({
-                        'service': listing.service,
-                        'region': listing.region,
-                        'operation': listing.operation,
-                        'iterated': '',
-                        'resource_type': resource_type,
-                        'count': len(items),
-                        'file': os.path.basename(path),
-                    })
-        elif kind == 'aws':
-            resources = listing.resources
-            for resource_type, items in resources.items():
+              for resource_type, items in resources.items():
                 entries.append({
-                    'service': listing.service,
-                    'region': listing.region,
-                    'operation': listing.operation,
-                    'iterated': '',
-                    'resource_type': resource_type,
-                    'count': len(items),
-                    'file': os.path.basename(path),
+                  'service': listing.service,
+                  'service_label': ALIYUN_SERVICE_NAMES.get(listing.service, listing.service),
+                  'region': listing.region,
+                  'operation': listing.operation,
+                  'iterated': '',
+                  'resource_type': resource_type,
+                  'count': len(items),
+                  'file': os.path.basename(path),
                 })
+        elif kind == 'aws':
+          resources = listing.resources
+          for resource_type, items in resources.items():
+            entries.append({
+              'service': listing.service,
+              'service_label': listing.service,
+              'region': listing.region,
+              'operation': listing.operation,
+              'iterated': '',
+              'resource_type': resource_type,
+              'count': len(items),
+              'file': os.path.basename(path),
+            })
     return entries
 
 
@@ -418,6 +422,9 @@ def _format_html(entries, title="Report"):
     const entries = $ENTRIES_JSON;
     const summary = $SUMMARY_JSON;
 
+    const SERVICE_LABELS = {};
+    entries.forEach(e => { SERVICE_LABELS[e.service] = e.service_label || e.service; });
+
     const serviceFilter = document.getElementById('serviceFilter');
     const regionFilter = document.getElementById('regionFilter');
     const searchInput = document.getElementById('searchInput');
@@ -468,7 +475,7 @@ def _format_html(entries, title="Report"):
       tr.dataset.type = item.resource_type;
       tr.dataset.file = item.file;
       tr.innerHTML = `
-        <td>$${item.service}</td>
+        <td>$${item.service_label}</td>
         <td>$${item.region || 'global'}</td>
         <td>$${item.operation}</td>
         <td>$${item.iterated || ''}</td>
@@ -492,11 +499,11 @@ def _format_html(entries, title="Report"):
       const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
       const max = sorted.length ? sorted[0][1] : 1;
       serviceChart.innerHTML = '';
-      sorted.forEach(([service, count]) => {
+        sorted.forEach(([service, count]) => {
         const row = document.createElement('div');
         row.className = 'bar';
         row.innerHTML = `
-          <div>$${service}</div>
+          <div>$${SERVICE_LABELS[service] || service}</div>
           <div class="track"><div class="fill" style="width:$${(count / max) * 100}%"></div></div>
           <div class="num">$${count}</div>
         `;
@@ -511,7 +518,7 @@ def _format_html(entries, title="Report"):
         const serviceNode = document.createElement('details');
         serviceNode.open = true;
         const serviceTotal = data.filter(d => d.service === service).reduce((a, b) => a + b.count, 0);
-        serviceNode.innerHTML = `<summary class="clickable" data-service="$${service}">$${service}<span class="pill">$${serviceTotal}</span></summary>`;
+        serviceNode.innerHTML = `<summary class="clickable" data-service="$${service}">$${SERVICE_LABELS[service] || service}<span class="pill">$${serviceTotal}</span></summary>`;
         const serviceStack = document.createElement('div');
         serviceStack.className = 'stack';
         Object.keys(tree[service]).sort().forEach(region => {

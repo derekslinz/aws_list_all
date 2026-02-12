@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aliyun Resource Report</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #34d399;
+      --border: #1f2937;
+      --panel-2: #0b1222;
+      --chip: #0b1f2f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background: radial-gradient(1200px 600px at 10% 10%, #13293d 0%, #0f172a 55%, #0b1020 100%);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .wrap {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr 1fr auto;
+      gap: 12px;
+      padding: 16px 24px 0;
+      align-items: center;
+    }
+    .controls input, .controls select {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text);
+      font-size: 12px;
+    }
+    .controls button {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    header {
+      padding: 32px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 24px;
+    }
+    .sub {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      padding: 16px 24px;
+    }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .card h2 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .card .big {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    .section {
+      padding: 8px 24px 24px;
+    }
+    details {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      background: #0d1426;
+    }
+    details summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text);
+      outline: none;
+    }
+    details + details {
+      margin-top: 10px;
+    }
+    .stack {
+      display: grid;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 6px 12px;
+      margin-top: 10px;
+    }
+    .node {
+      color: var(--muted);
+    }
+    .leaf {
+      color: var(--text);
+    }
+    .pill {
+      background: var(--chip);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 11px;
+      color: var(--accent);
+      margin-left: 8px;
+    }
+    .clickable {
+      cursor: pointer;
+    }
+    .bar-chart {
+      display: grid;
+      gap: 8px;
+    }
+    .bar {
+      display: grid;
+      grid-template-columns: 120px 1fr 50px;
+      gap: 12px;
+      align-items: center;
+      font-size: 12px;
+    }
+    .bar .track {
+      background: var(--panel-2);
+      border-radius: 999px;
+      height: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .bar .fill {
+      background: var(--accent);
+      height: 100%;
+      border-radius: 999px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      table-layout: fixed;
+    }
+    th, td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      text-align: left;
+      vertical-align: top;
+      word-break: break-word;
+    }
+    th {
+      background: #0b1222;
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    tr:nth-child(even) td {
+      background: #0d1426;
+    }
+    .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 16px;
+    }
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+      .controls { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+  <header>
+    <h1>Aliyun Resource Report</h1>
+    <div class="sub">Generated at 2026-02-12T16:06:07Z · <span id="filteredMeta"></span></div>
+  </header>
+  <div class="controls">
+    <input id="searchInput" placeholder="Search service, region, operation, iterated, type, file..." />
+    <select id="serviceFilter"></select>
+    <select id="regionFilter"></select>
+    <div style="display:flex; gap:8px; justify-content:flex-end;">
+      <button id="resetFilters">Reset</button>
+      <button id="expandAll">Expand</button>
+      <button id="collapseAll">Collapse</button>
+    </div>
+  </div>
+  <div class="grid">
+    <div class="card"><h2>Total Resources</h2><div class="big" id="totalResources">5204</div></div>
+    <div class="card"><h2>Services</h2><div class="big" id="totalServices">14</div></div>
+    <div class="card"><h2>Files</h2><div class="big" id="totalFiles">45</div></div>
+    <div class="card"><h2>Entries</h2><div class="big" id="totalEntries">268</div></div>
+  </div>
+  <div class="section two-col">
+    <div>
+      <h2>Resources by Service</h2>
+      <div class="bar-chart" id="serviceChart"></div>
+    </div>
+    <div>
+      <h2>Hierarchy</h2>
+      <div class="stack" id="hierarchy"></div>
+    </div>
+  </div>
+  <div class="section">
+    <h2>Details</h2>
+    <div style="overflow:auto; max-height: 60vh;">
+    <table>
+      <thead>
+        <tr>
+          <th>Service</th><th>Region</th><th>Operation</th><th>Iterated</th><th>Type</th><th class="num">Count</th><th>File</th>
+        </tr>
+      </thead>
+      <tbody id="detailBody"></tbody>
+    </table>
+    </div>
+  </div>
+  </div>
+  <script>
+    const entries = [{"service":"adb","service_label":"AnalyticDB for MySQL","region":"us-east-1","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":24,"file":"adb_DescribeRegions_us-east-1_default.json"},{"service":"adb","service_label":"AnalyticDB for MySQL","region":"us-east-1","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":4,"file":"adb_DescribeVpcs_us-east-1_default.json"},{"service":"alb","service_label":"Application Load Balancer","region":"us-east-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-c6yfbamjr658vqgc9l","resource_type":"Listeners","count":2,"file":"alb_ListListeners_us-east-1_default.json"},{"service":"alb","service_label":"Application Load Balancer","region":"us-east-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-umq151lp30fq9spf2o","resource_type":"Listeners","count":1,"file":"alb_ListListeners_us-east-1_default.json"},{"service":"alb","service_label":"Application Load Balancer","region":"us-east-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-76nen1zhkhouhg581r","resource_type":"Listeners","count":2,"file":"alb_ListListeners_us-east-1_default.json"},{"service":"alb","service_label":"Application Load Balancer","region":"us-east-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-j86acfj7d9v6nbp9cm","resource_type":"Listeners","count":2,"file":"alb_ListListeners_us-east-1_default.json"},{"service":"alb","service_label":"Application Load Balancer","region":"us-east-1","operation":"ListListeners","iterated":"LoadBalancerIds.1=alb-uplxji5wdnojp1jwhw","resource_type":"Listeners","count":2,"file":"alb_ListListeners_us-east-1_default.json"},{"service":"alb","service_label":"Application Load Balancer","region":"us-east-1","operation":"ListLoadBalancers","iterated":"","resource_type":"LoadBalancers","count":5,"file":"alb_ListLoadBalancers_us-east-1_default.json"},{"service":"alb","service_label":"Application Load Balancer","region":"us-east-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-c6yfbamjr658vqgc9l","resource_type":"ServerGroups","count":6,"file":"alb_ListServerGroups_us-east-1_default.json"},{"service":"alb","service_label":"Application Load Balancer","region":"us-east-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-umq151lp30fq9spf2o","resource_type":"ServerGroups","count":6,"file":"alb_ListServerGroups_us-east-1_default.json"},{"service":"alb","service_label":"Application Load Balancer","region":"us-east-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-76nen1zhkhouhg581r","resource_type":"ServerGroups","count":6,"file":"alb_ListServerGroups_us-east-1_default.json"},{"service":"alb","service_label":"Application Load Balancer","region":"us-east-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-j86acfj7d9v6nbp9cm","resource_type":"ServerGroups","count":6,"file":"alb_ListServerGroups_us-east-1_default.json"},{"service":"alb","service_label":"Application Load Balancer","region":"us-east-1","operation":"ListServerGroups","iterated":"LoadBalancerIds.1=alb-uplxji5wdnojp1jwhw","resource_type":"ServerGroups","count":6,"file":"alb_ListServerGroups_us-east-1_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainGroups","iterated":"","resource_type":"DomainGroups","count":3,"file":"alidns_DescribeDomainGroups_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=upsolartrack.top","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=visiondigital.mobi","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=karldsp.com","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=adkiteflow.com","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=vidnexent.com","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=aiorbitpro.com","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=sparknovex.com","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=engageadmedia.cloud","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=getstart.mobi","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=cloudgamehub.top","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=gamenews.mobi","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=minmov.com","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=story100.top","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=wall100.top","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=center100.top","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=vikingmedia.mobi","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=flymobi.biz","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=flymobiadx.com","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=flymobidsp.com","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainLogs","iterated":"DomainName=flymobi.top","resource_type":"DomainLogs","count":14,"file":"alidns_DescribeDomainLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=upsolartrack.top","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=visiondigital.mobi","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=karldsp.com","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=adkiteflow.com","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=vidnexent.com","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=aiorbitpro.com","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=sparknovex.com","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=engageadmedia.cloud","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=getstart.mobi","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=cloudgamehub.top","resource_type":"DomainNs","count":0,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=gamenews.mobi","resource_type":"DomainNs","count":0,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=minmov.com","resource_type":"DomainNs","count":0,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=story100.top","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=wall100.top","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=center100.top","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=vikingmedia.mobi","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=flymobi.biz","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=flymobiadx.com","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=flymobidsp.com","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainNs","iterated":"DomainName=flymobi.top","resource_type":"DomainNs","count":2,"file":"alidns_DescribeDomainNs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=upsolartrack.top","resource_type":"DomainRecords","count":2,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=visiondigital.mobi","resource_type":"DomainRecords","count":7,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=karldsp.com","resource_type":"DomainRecords","count":3,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=adkiteflow.com","resource_type":"DomainRecords","count":3,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=vidnexent.com","resource_type":"DomainRecords","count":3,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=aiorbitpro.com","resource_type":"DomainRecords","count":3,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=sparknovex.com","resource_type":"DomainRecords","count":3,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=engageadmedia.cloud","resource_type":"DomainRecords","count":0,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=getstart.mobi","resource_type":"DomainRecords","count":24,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=cloudgamehub.top","resource_type":"DomainRecords","count":2,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=gamenews.mobi","resource_type":"DomainRecords","count":3,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=minmov.com","resource_type":"DomainRecords","count":2,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=story100.top","resource_type":"DomainRecords","count":2,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=wall100.top","resource_type":"DomainRecords","count":2,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=center100.top","resource_type":"DomainRecords","count":14,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=vikingmedia.mobi","resource_type":"DomainRecords","count":64,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=flymobi.biz","resource_type":"DomainRecords","count":34,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=flymobiadx.com","resource_type":"DomainRecords","count":15,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=flymobidsp.com","resource_type":"DomainRecords","count":26,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomainRecords","iterated":"DomainName=flymobi.top","resource_type":"DomainRecords","count":31,"file":"alidns_DescribeDomainRecords_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeDomains","iterated":"","resource_type":"Domains","count":20,"file":"alidns_DescribeDomains_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=upsolartrack.top","resource_type":"RecordLogs","count":2,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=visiondigital.mobi","resource_type":"RecordLogs","count":36,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=karldsp.com","resource_type":"RecordLogs","count":5,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=adkiteflow.com","resource_type":"RecordLogs","count":5,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=vidnexent.com","resource_type":"RecordLogs","count":5,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=aiorbitpro.com","resource_type":"RecordLogs","count":5,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=sparknovex.com","resource_type":"RecordLogs","count":5,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=engageadmedia.cloud","resource_type":"RecordLogs","count":0,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=getstart.mobi","resource_type":"RecordLogs","count":102,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=cloudgamehub.top","resource_type":"RecordLogs","count":2,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=gamenews.mobi","resource_type":"RecordLogs","count":3,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=minmov.com","resource_type":"RecordLogs","count":2,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=story100.top","resource_type":"RecordLogs","count":2,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=wall100.top","resource_type":"RecordLogs","count":2,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=center100.top","resource_type":"RecordLogs","count":39,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=vikingmedia.mobi","resource_type":"RecordLogs","count":292,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=flymobi.biz","resource_type":"RecordLogs","count":49,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=flymobiadx.com","resource_type":"RecordLogs","count":7,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=flymobidsp.com","resource_type":"RecordLogs","count":16,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeRecordLogs","iterated":"DomainName=flymobi.top","resource_type":"RecordLogs","count":51,"file":"alidns_DescribeRecordLogs_global_default.json"},{"service":"alidns","service_label":"Cloud DNS","region":"global","operation":"DescribeSupportLines","iterated":"","resource_type":"SupportLines","count":782,"file":"alidns_DescribeSupportLines_global_default.json"},{"service":"alikafka","service_label":"ApsaraMQ for Kafka","region":"us-east-1","operation":"GetConsumerList","iterated":"InstanceId=alikafka_pre-cn-8ly3z8wg9001","resource_type":"Consumers","count":1,"file":"alikafka_GetConsumerList_us-east-1_default.json"},{"service":"alikafka","service_label":"ApsaraMQ for Kafka","region":"us-east-1","operation":"GetConsumerList","iterated":"InstanceId=alikafka_pre-cn-to33sr0pa004","resource_type":"Consumers","count":0,"file":"alikafka_GetConsumerList_us-east-1_default.json"},{"service":"alikafka","service_label":"ApsaraMQ for Kafka","region":"us-east-1","operation":"GetInstanceList","iterated":"","resource_type":"Instances","count":2,"file":"alikafka_GetInstanceList_us-east-1_default.json"},{"service":"alikafka","service_label":"ApsaraMQ for Kafka","region":"us-east-1","operation":"GetTopicList","iterated":"InstanceId=alikafka_pre-cn-8ly3z8wg9001","resource_type":"Topics","count":1,"file":"alikafka_GetTopicList_us-east-1_default.json"},{"service":"alikafka","service_label":"ApsaraMQ for Kafka","region":"us-east-1","operation":"GetTopicList","iterated":"InstanceId=alikafka_pre-cn-to33sr0pa004","resource_type":"Topics","count":0,"file":"alikafka_GetTopicList_us-east-1_default.json"},{"service":"cdn","service_label":"CDN","region":"global","operation":"DescribeUserDomains","iterated":"","resource_type":"Domains","count":2,"file":"cdn_DescribeUserDomains_global_default.json"},{"service":"cr","service_label":"Container Registry","region":"us-east-1","operation":"ListInstanceRegion","iterated":"","resource_type":"InstanceRegions","count":29,"file":"cr_ListInstanceRegion_us-east-1_default.json"},{"service":"domain","service_label":"Domain","region":"global","operation":"QueryDomainList","iterated":"","resource_type":"Domains","count":9,"file":"domain_QueryDomainList_global_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeDisks","iterated":"","resource_type":"Disks","count":47,"file":"ecs_DescribeDisks_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeImages","iterated":"","resource_type":"Images","count":358,"file":"ecs_DescribeImages_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeInstanceStatus","iterated":"","resource_type":"InstanceStatuses","count":32,"file":"ecs_DescribeInstanceStatus_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeInstanceTypeFamilies","iterated":"","resource_type":"InstanceTypeFamilies","count":184,"file":"ecs_DescribeInstanceTypeFamilies_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeInstanceTypes","iterated":"","resource_type":"InstanceTypes","count":1600,"file":"ecs_DescribeInstanceTypes_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeInstances","iterated":"","resource_type":"Instances","count":32,"file":"ecs_DescribeInstances_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeKeyPairs","iterated":"","resource_type":"KeyPairs","count":8,"file":"ecs_DescribeKeyPairs_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeNetworkInterfaces","iterated":"","resource_type":"NetworkInterfaces","count":60,"file":"ecs_DescribeNetworkInterfaces_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi7ok0p6nt0jkqhbvoc","resource_type":"SecurityGroupAttribute","count":8,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi1u2bluckrcwduii8u","resource_type":"SecurityGroupAttribute","count":8,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xidml67iqaczot3r4kx","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xig1aj4ujgyyp30qb40","resource_type":"SecurityGroupAttribute","count":3,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xidgycrnoo7t6194yhz","resource_type":"SecurityGroupAttribute","count":20,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xifyb2hxmdcgigbtcpb","resource_type":"SecurityGroupAttribute","count":16,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi7qfhrupwt2utkhe97","resource_type":"SecurityGroupAttribute","count":9,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xidsdkjl8srpjorqvq8","resource_type":"SecurityGroupAttribute","count":16,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xiiqf5su0xm265k56ke","resource_type":"SecurityGroupAttribute","count":6,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi1m1r1exucr2gfhw8f","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi1m1r1exuceugjdnoi","resource_type":"SecurityGroupAttribute","count":17,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi69vre76jnnur3vulw","resource_type":"SecurityGroupAttribute","count":10,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi9e42kn4hoq1jjyglw","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xiak685sbycseg3lwuc","resource_type":"SecurityGroupAttribute","count":2,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi7ud6pvh35gji37eh8","resource_type":"SecurityGroupAttribute","count":62,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xiflsfqi7zp9qcvlskz","resource_type":"SecurityGroupAttribute","count":6,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xi3tkxa9jtux0wfqcnd","resource_type":"SecurityGroupAttribute","count":11,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroupAttribute","iterated":"SecurityGroupId=sg-0xif4juu0mjmv24z3t9l","resource_type":"SecurityGroupAttribute","count":0,"file":"ecs_DescribeSecurityGroupAttribute_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSecurityGroups","iterated":"","resource_type":"SecurityGroups","count":18,"file":"ecs_DescribeSecurityGroups_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeSnapshots","iterated":"","resource_type":"Snapshots","count":72,"file":"ecs_DescribeSnapshots_us-east-1_default.json"},{"service":"ecs","service_label":"Elastic Compute Service","region":"us-east-1","operation":"DescribeZones","iterated":"","resource_type":"Zones","count":2,"file":"ecs_DescribeZones_us-east-1_default.json"},{"service":"ess","service_label":"Auto Scaling","region":"us-east-1","operation":"DescribeLimitation","iterated":"","resource_type":"Limitation","count":1,"file":"ess_DescribeLimitation_us-east-1_default.json"},{"service":"ess","service_label":"Auto Scaling","region":"us-east-1","operation":"DescribeNotificationTypes","iterated":"","resource_type":"NotificationTypes","count":11,"file":"ess_DescribeNotificationTypes_us-east-1_default.json"},{"service":"ess","service_label":"Auto Scaling","region":"us-east-1","operation":"DescribeRegions","iterated":"","resource_type":"Regions","count":28,"file":"ess_DescribeRegions_us-east-1_default.json"},{"service":"oss","service_label":"oss","region":"us-east-1","operation":"ListBuckets","iterated":"","resource_type":"Buckets","count":22,"file":"oss_ListBuckets_us-east-1_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=actiontrail","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=entconsole","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=ram","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=csk","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=nat","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=eip","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=config","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=vpc","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cbwp","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=vpn","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=expressconnect","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cbn","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=ecs","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=slb","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=mysql","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=ecs-spec","resource_type":"QuotaDimensions","count":4,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=ess","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=ros","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=ccc","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=kvstore","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cdn","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=polardb","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=bssopenapi","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=mongodb","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cps","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=iot","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=eci","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cms","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=dypls","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=outboundbot","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=nlp","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=edas","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=learn","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=dcdn","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=gpdb","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=dns","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=openapiexplorer","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cfw","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=sas","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=ons","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=sca","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cloudphone","resource_type":"QuotaDimensions","count":3,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=live","resource_type":"QuotaDimensions","count":2,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=dyvms","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=dysms","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=disk","resource_type":"QuotaDimensions","count":5,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=apigateway","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=computenest","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=ga","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=quotas","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=dms","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=privatelink","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cas","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=alb","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=ipv6gateway","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=beebot","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=bccluster","resource_type":"QuotaDimensions","count":3,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=nlb","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=uis","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=oss","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=dbfs","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=oos","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=bpstudio","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=ads","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=gws","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=eventbridge","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=mse","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=waf","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cams","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cdt","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=hdm","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=smartag","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=netana","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cloudsso","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=ddos","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=tag","resource_type":"QuotaDimensions","count":2,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cloudcontrol","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=selectdb","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=vod","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=grafana","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=odps","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=acs","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=rabbitmq","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=lvwang","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=milvus","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=hologram","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=mns","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=mse-governance","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=mse-registry","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=rocketmq","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=hitsdb","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=ens","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=gwlb","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=swas","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=esa","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=bdrc","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=fc","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=nas","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=acr","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=sos","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=hbr","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=rds","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=ots","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=eais","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cn-heyuan-acdr-1","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=alikafka","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=fnf","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=mqtt","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=kms","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=energyexpert","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=idaas","resource_type":"QuotaDimensions","count":1,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=sc","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=sddp","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=hcs_sgw","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProductQuotaDimensions","iterated":"ProductCode=cloudauth","resource_type":"QuotaDimensions","count":0,"file":"quotas_ListProductQuotaDimensions_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListProducts","iterated":"","resource_type":"Products","count":115,"file":"quotas_ListProducts_global_default.json"},{"service":"quotas","service_label":"quotas","region":"global","operation":"ListQuotaApplicationsDetailForTemplate","iterated":"","resource_type":"QuotaApplicationsDetailForTemplate","count":199,"file":"quotas_ListQuotaApplicationsDetailForTemplate_global_default.json"},{"service":"rds","service_label":"ApsaraDB for RDS","region":"us-east-1","operation":"DescribeAccounts","iterated":"DBInstanceId=rm-0xi4z19bu67kmqph6","resource_type":"DBAccounts","count":7,"file":"rds_DescribeAccounts_us-east-1_default.json"},{"service":"rds","service_label":"ApsaraDB for RDS","region":"us-east-1","operation":"DescribeAccounts","iterated":"DBInstanceId=rm-0xig8l6102l11wmv4","resource_type":"DBAccounts","count":2,"file":"rds_DescribeAccounts_us-east-1_default.json"},{"service":"rds","service_label":"ApsaraDB for RDS","region":"us-east-1","operation":"DescribeAccounts","iterated":"DBInstanceId=rm-0xim5bttukvb2f191","resource_type":"DBAccounts","count":2,"file":"rds_DescribeAccounts_us-east-1_default.json"},{"service":"rds","service_label":"ApsaraDB for RDS","region":"us-east-1","operation":"DescribeDBInstanceAttribute","iterated":"DBInstanceId=rm-0xi4z19bu67kmqph6","resource_type":"DBInstanceAttributes","count":1,"file":"rds_DescribeDBInstanceAttribute_us-east-1_default.json"},{"service":"rds","service_label":"ApsaraDB for RDS","region":"us-east-1","operation":"DescribeDBInstanceAttribute","iterated":"DBInstanceId=rm-0xig8l6102l11wmv4","resource_type":"DBInstanceAttributes","count":1,"file":"rds_DescribeDBInstanceAttribute_us-east-1_default.json"},{"service":"rds","service_label":"ApsaraDB for RDS","region":"us-east-1","operation":"DescribeDBInstanceAttribute","iterated":"DBInstanceId=rm-0xim5bttukvb2f191","resource_type":"DBInstanceAttributes","count":1,"file":"rds_DescribeDBInstanceAttribute_us-east-1_default.json"},{"service":"rds","service_label":"ApsaraDB for RDS","region":"us-east-1","operation":"DescribeDBInstances","iterated":"","resource_type":"DBInstances","count":3,"file":"rds_DescribeDBInstances_us-east-1_default.json"},{"service":"rds","service_label":"ApsaraDB for RDS","region":"us-east-1","operation":"DescribeDatabases","iterated":"DBInstanceId=rm-0xi4z19bu67kmqph6","resource_type":"Databases","count":5,"file":"rds_DescribeDatabases_us-east-1_default.json"},{"service":"rds","service_label":"ApsaraDB for RDS","region":"us-east-1","operation":"DescribeDatabases","iterated":"DBInstanceId=rm-0xig8l6102l11wmv4","resource_type":"Databases","count":1,"file":"rds_DescribeDatabases_us-east-1_default.json"},{"service":"rds","service_label":"ApsaraDB for RDS","region":"us-east-1","operation":"DescribeDatabases","iterated":"DBInstanceId=rm-0xim5bttukvb2f191","resource_type":"Databases","count":2,"file":"rds_DescribeDatabases_us-east-1_default.json"},{"service":"slb","service_label":"Server Load Balancer","region":"us-east-1","operation":"DescribeLoadBalancers","iterated":"","resource_type":"LoadBalancers","count":7,"file":"slb_DescribeLoadBalancers_us-east-1_default.json"},{"service":"vpc","service_label":"Virtual Private Cloud","region":"us-east-1","operation":"DescribeEipAddresses","iterated":"","resource_type":"EipAddresses","count":20,"file":"vpc_DescribeEipAddresses_us-east-1_default.json"},{"service":"vpc","service_label":"Virtual Private Cloud","region":"us-east-1","operation":"DescribeVSwitches","iterated":"","resource_type":"VSwitches","count":7,"file":"vpc_DescribeVSwitches_us-east-1_default.json"},{"service":"vpc","service_label":"Virtual Private Cloud","region":"us-east-1","operation":"DescribeVpcs","iterated":"","resource_type":"Vpcs","count":4,"file":"vpc_DescribeVpcs_us-east-1_default.json"}];
+    const summary = {"total_resources":5204,"services":{"adb":28,"alb":44,"alidns":1992,"alikafka":4,"cdn":2,"cr":29,"domain":9,"ecs":2613,"ess":40,"oss":22,"quotas":358,"rds":25,"slb":7,"vpc":31},"files":45,"entries":268};
+
+    const SERVICE_LABELS = {};
+    entries.forEach(e => { SERVICE_LABELS[e.service] = e.service_label || e.service; });
+
+    const serviceFilter = document.getElementById('serviceFilter');
+    const regionFilter = document.getElementById('regionFilter');
+    const searchInput = document.getElementById('searchInput');
+    const detailBody = document.getElementById('detailBody');
+    const hierarchyEl = document.getElementById('hierarchy');
+    const serviceChart = document.getElementById('serviceChart');
+
+    function uniqueValues(key) {
+      const set = new Set(entries.map(e => e[key] || 'global'));
+      return Array.from(set).sort();
+    }
+
+    function buildSelect(select, values, label) {
+      select.innerHTML = '';
+      const optAll = document.createElement('option');
+      optAll.value = '';
+      optAll.textContent = 'All ' + label;
+      select.appendChild(optAll);
+      values.forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+      });
+    }
+
+    function buildHierarchy(data) {
+      const tree = {};
+      data.forEach(item => {
+        const region = item.region || 'global';
+        const iter = item.iterated || 'all';
+        tree[item.service] = tree[item.service] || {};
+        tree[item.service][region] = tree[item.service][region] || {};
+        tree[item.service][region][item.operation] = tree[item.service][region][item.operation] || {};
+        tree[item.service][region][item.operation][iter] = tree[item.service][region][item.operation][iter] || {};
+        tree[item.service][region][item.operation][iter][item.resource_type] =
+          (tree[item.service][region][item.operation][iter][item.resource_type] || 0) + item.count;
+      });
+      return tree;
+    }
+
+    function createDetailRow(item) {
+      const tr = document.createElement('tr');
+      tr.dataset.service = item.service;
+      tr.dataset.region = item.region || 'global';
+      tr.dataset.operation = item.operation;
+      tr.dataset.iterated = item.iterated || '';
+      tr.dataset.type = item.resource_type;
+      tr.dataset.file = item.file;
+      tr.innerHTML = `
+        <td>${item.service_label}</td>
+        <td>${item.region || 'global'}</td>
+        <td>${item.operation}</td>
+        <td>${item.iterated || ''}</td>
+        <td>${item.resource_type}</td>
+        <td class="num">${item.count}</td>
+        <td>${item.file}</td>
+      `;
+      return tr;
+    }
+
+    function renderDetails(data) {
+      detailBody.innerHTML = '';
+      data.forEach(item => detailBody.appendChild(createDetailRow(item)));
+    }
+
+    function renderChart(data) {
+      const totals = {};
+      data.forEach(item => {
+        totals[item.service] = (totals[item.service] || 0) + item.count;
+      });
+      const sorted = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+      const max = sorted.length ? sorted[0][1] : 1;
+      serviceChart.innerHTML = '';
+        sorted.forEach(([service, count]) => {
+        const row = document.createElement('div');
+        row.className = 'bar';
+        row.innerHTML = `
+          <div>${SERVICE_LABELS[service] || service}</div>
+          <div class="track"><div class="fill" style="width:${(count / max) * 100}%"></div></div>
+          <div class="num">${count}</div>
+        `;
+        serviceChart.appendChild(row);
+      });
+    }
+
+    function renderHierarchy(data) {
+      const tree = buildHierarchy(data);
+      hierarchyEl.innerHTML = '';
+      Object.keys(tree).sort().forEach(service => {
+        const serviceNode = document.createElement('details');
+        serviceNode.open = true;
+        const serviceTotal = data.filter(d => d.service === service).reduce((a, b) => a + b.count, 0);
+        serviceNode.innerHTML = `<summary class="clickable" data-service="${service}">${SERVICE_LABELS[service] || service}<span class="pill">${serviceTotal}</span></summary>`;
+        const serviceStack = document.createElement('div');
+        serviceStack.className = 'stack';
+        Object.keys(tree[service]).sort().forEach(region => {
+          const regionNode = document.createElement('details');
+          regionNode.innerHTML = `<summary class="clickable" data-service="${service}" data-region="${region}">${region}</summary>`;
+          const regionStack = document.createElement('div');
+          regionStack.className = 'stack';
+          Object.keys(tree[service][region]).sort().forEach(operation => {
+            const opNode = document.createElement('details');
+            opNode.innerHTML = `<summary class="clickable" data-service="${service}" data-region="${region}" data-operation="${operation}">${operation}</summary>`;
+            const opStack = document.createElement('div');
+            opStack.className = 'stack';
+            const iterKeys = Object.keys(tree[service][region][operation]).sort();
+            if (iterKeys.length === 1 && iterKeys[0] === 'all') {
+              const grid = document.createElement('div');
+              grid.className = 'grid-2';
+              Object.keys(tree[service][region][operation].all).sort().forEach(type => {
+                const count = tree[service][region][operation].all[type];
+                const label = document.createElement('div');
+                label.className = 'node leaf clickable';
+                label.dataset.service = service;
+                label.dataset.region = region;
+                label.dataset.operation = operation;
+                label.dataset.type = type;
+                label.textContent = type;
+                const num = document.createElement('div');
+                num.className = 'num';
+                num.textContent = count;
+                grid.appendChild(label);
+                grid.appendChild(num);
+              });
+              opStack.appendChild(grid);
+            } else {
+              iterKeys.forEach(iter => {
+                const iterNode = document.createElement('details');
+                iterNode.innerHTML = `<summary class="clickable" data-service="${service}" data-region="${region}" data-operation="${operation}" data-iterated="${iter}">${iter}</summary>`;
+                const grid = document.createElement('div');
+                grid.className = 'grid-2';
+                Object.keys(tree[service][region][operation][iter]).sort().forEach(type => {
+                  const count = tree[service][region][operation][iter][type];
+                  const label = document.createElement('div');
+                  label.className = 'node leaf clickable';
+                  label.dataset.service = service;
+                  label.dataset.region = region;
+                  label.dataset.operation = operation;
+                  label.dataset.iterated = iter;
+                  label.dataset.type = type;
+                  label.textContent = type;
+                  const num = document.createElement('div');
+                  num.className = 'num';
+                  num.textContent = count;
+                  grid.appendChild(label);
+                  grid.appendChild(num);
+                });
+                iterNode.appendChild(grid);
+                opStack.appendChild(iterNode);
+              });
+            }
+            opNode.appendChild(opStack);
+            regionStack.appendChild(opNode);
+          });
+          regionNode.appendChild(regionStack);
+          serviceStack.appendChild(regionNode);
+        });
+        serviceNode.appendChild(serviceStack);
+        hierarchyEl.appendChild(serviceNode);
+      });
+    }
+
+    function filterData() {
+      const svc = serviceFilter.value;
+      const region = regionFilter.value;
+      const q = searchInput.value.toLowerCase().trim();
+      return entries.filter(e => {
+        const r = e.region || 'global';
+        if (svc && e.service !== svc) return false;
+        if (region && r !== region) return false;
+        if (q) {
+          const hay = `${e.service} ${r} ${e.operation} ${e.iterated || ''} ${e.resource_type} ${e.file}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+    }
+
+    function updateSummary(data) {
+      const totalResources = data.reduce((a, b) => a + b.count, 0);
+      const services = new Set(data.map(d => d.service)).size;
+      const files = new Set(data.map(d => d.file)).size;
+      document.getElementById('totalResources').textContent = totalResources;
+      document.getElementById('totalServices').textContent = services;
+      document.getElementById('totalFiles').textContent = files;
+      document.getElementById('totalEntries').textContent = data.length;
+      document.getElementById('filteredMeta').textContent = `${data.length} rows shown`;
+    }
+
+    function applyFilters() {
+      const data = filterData();
+      renderDetails(data);
+      renderChart(data);
+      renderHierarchy(data);
+      updateSummary(data);
+    }
+
+    function setFilters(dataset) {
+      if (dataset.service) serviceFilter.value = dataset.service;
+      if (dataset.region) regionFilter.value = dataset.region;
+      if (dataset.operation) searchInput.value = dataset.operation;
+      if (dataset.iterated) searchInput.value = dataset.iterated;
+      if (dataset.type) searchInput.value = dataset.type;
+      applyFilters();
+    }
+
+    buildSelect(serviceFilter, uniqueValues('service'), 'Services');
+    buildSelect(regionFilter, uniqueValues('region'), 'Regions');
+    renderDetails(entries);
+    renderChart(entries);
+    renderHierarchy(entries);
+    updateSummary(entries);
+
+    serviceFilter.addEventListener('change', applyFilters);
+    regionFilter.addEventListener('change', applyFilters);
+    searchInput.addEventListener('input', applyFilters);
+
+    document.getElementById('resetFilters').addEventListener('click', () => {
+      serviceFilter.value = '';
+      regionFilter.value = '';
+      searchInput.value = '';
+      applyFilters();
+    });
+    document.getElementById('expandAll').addEventListener('click', () => {
+      document.querySelectorAll('details').forEach(d => d.open = true);
+    });
+    document.getElementById('collapseAll').addEventListener('click', () => {
+      document.querySelectorAll('details').forEach(d => d.open = false);
+    });
+    hierarchyEl.addEventListener('click', (e) => {
+      const target = e.target.closest('.clickable');
+      if (!target || !hierarchyEl.contains(target)) return;
+      if (target.tagName.toLowerCase() === 'summary') {
+        setFilters(target.dataset);
+      } else if (target.classList.contains('leaf')) {
+        setFilters(target.dataset);
+      }
+    });
+  </script>
+</body>
+</html>
